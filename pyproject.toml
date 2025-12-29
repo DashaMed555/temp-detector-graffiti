@@ -1,0 +1,47 @@
+[project]
+name = "detector-graffiti"
+version = "0.1.0"
+description = "The graffiti detector, based on the Grounding DINO model, recognizes drawings and inscriptions on the walls of buildings, divides them into good and bad, and issues detections to the user."
+authors = [
+    {name = "GoenkoAlina", email = "a.goenko@g.nsu.ru"},
+    {name = "DashaMed555", email = "DashaMed555@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+torch = "^2.0.0"
+transformers = "4.54.1"
+numpy = "^1.24.0"
+pillow = "^10.0.0"
+
+hydra-core = {version = "^1.3.0", extras = ["colorlog"]}
+mlflow = "^2.0.0"
+dvc = {version = "^3.0.0", extras = ["gdrive"]}
+pre-commit = "^3.0.0"
+fire = "^0.5.0"
+
+onnx = "^1.14.0"
+onnxruntime = "^1.15.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.0.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"
+line_length = 88
