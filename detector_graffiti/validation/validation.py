@@ -33,7 +33,7 @@ def main(config: DictConfig):
 
     val_ds = JsonDataset(
         config.data_loading.val_json_path,
-        config.data_loading.val_image_root,
+        config.data_loading.val_image_path,
         label2id,
     )
 
@@ -81,7 +81,10 @@ def main(config: DictConfig):
         eval_dataset=val_ds,
         data_collator=collate_fn,
         compute_metrics=compute_metrics,
+        config=config.model,
+        processor=processor,
     )
+
     trainer.evaluate()
 
 

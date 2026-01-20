@@ -1,6 +1,6 @@
 output_dir: "runs/inference"
 images_path: "../../dataset_very_mini/dataset/test/images"
-model_path: "IDEA-Research/grounding-dino-base"
+model_path: "runs/fine-tuning/2026-01-20 23-29-49/ft_model"
 prompt: "legal graffiti . illegal graffiti ."
 box_threshold: 0.3
 text_threshold: 0.3

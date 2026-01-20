@@ -99,8 +99,9 @@ def main(config: DictConfig):
     )
 
     trainer.train()
-    model.save_pretrained(output_dir)
-    processor.save_pretrained(output_dir)
+    model_path = os.path.join(output_dir, "ft_model")
+    model.save_pretrained(model_path)
+    processor.save_pretrained(model_path)
 
 
 if __name__ == "__main__":

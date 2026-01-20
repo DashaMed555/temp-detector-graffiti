@@ -1,4 +1,4 @@
-ft_model_path: "models/grounding_dino_ft"
+ft_model_path: "runs/fine-tuning/2026-01-20 23-29-49/ft_model"
 output_dir: "runs/val"
 per_device_train_batch_size: 2
 per_device_eval_batch_size: 8
