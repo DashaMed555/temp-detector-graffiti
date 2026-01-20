@@ -7,10 +7,10 @@ from torch.utils.data import Dataset
 
 
 class JsonDataset(Dataset):
-    def __init__(self, json_path, image_root, label2id):
+    def __init__(self, json_path, image_path, label2id):
         with open(json_path, "r") as f:
             data = json.load(f)
-        self.image_root = image_root
+        self.image_path = image_path
         self.items = []
 
         for entry in data:
@@ -31,7 +31,7 @@ class JsonDataset(Dataset):
                 boxes = torch.zeros((0, 4), dtype=torch.float32)
                 class_labels = torch.zeros((0,), dtype=torch.long)
 
-            image_path = os.path.join(image_root, entry["image_name"])
+            image_path = os.path.join(image_path, entry["image_name"])
 
             self.items.append(
                 {

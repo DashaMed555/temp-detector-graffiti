@@ -1,25 +1,29 @@
-from .. import processor
-
-text_prompt = "graffiti ."
+from omegaconf import DictConfig
 
 
-def collate_fn(batch):
-    images = [b["image"] for b in batch]
-    text_prompts = [text_prompt] * len(images)
+class DataCollator:
+    def __init__(self, config: DictConfig = None, processor=None):
+        self.config = config
+        self.processor = processor
 
-    enc = processor(
-        images=images,
-        text=text_prompts,
-        return_tensors="pt",
-        padding="max_length",
-        truncation=True,
-        max_length=64,
-    )
+    def __call__(self, batch):
+        images = [b["image"] for b in batch]
+        text_prompts = [self.config.text_prompt] * len(images)
 
-    enc["model_inputs"] = {k: v for k, v in enc.items()}
+        enc = self.processor(
+            images=images,
+            text=text_prompts,
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=self.config.max_length,
+        )
 
-    enc["labels"] = [
-        {"class_labels": b["class_labels"], "boxes": b["boxes"]} for b in batch
-    ]
-    enc["orig_sizes"] = [b["size"] for b in batch]
-    return enc
+        enc["model_inputs"] = {k: v for k, v in enc.items()}
+
+        enc["labels"] = [
+            {"class_labels": b["class_labels"], "boxes": b["boxes"]}
+            for b in batch
+        ]
+        enc["orig_sizes"] = [b["size"] for b in batch]
+        return enc

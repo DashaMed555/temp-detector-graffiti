@@ -1,0 +1,6 @@
+output_dir: "runs/inference"
+images_path: "../dataset/images_test"
+model_path: "../grounding_dino_ft"
+prompt: "legal graffiti . illegal graffiti ."
+box_threshold: 0.3
+text_threshold: 0.3

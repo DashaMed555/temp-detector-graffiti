@@ -1,10 +1,14 @@
 import torch
+from omegaconf import DictConfig
 from transformers import Trainer
-
-from .. import processor
 
 
 class GroundingDINOTrainer(Trainer):
+    def __init__(self, config: DictConfig = None, processor=None, **kwargs):
+        super().__init__(**kwargs)
+        self.processor = processor
+        self.config = config
+
     def _build_model_inputs(self, batch, device):
         if "model_inputs" in batch:
             model_inputs = {
@@ -69,11 +73,11 @@ class GroundingDINOTrainer(Trainer):
 
         target_sizes = inputs.get("orig_sizes", None)
 
-        results = processor.post_process_grounded_object_detection(
+        results = self.processor.post_process_grounded_object_detection(
             outputs,
             input_ids=input_ids,
-            box_threshold=0.4,
-            text_threshold=0.4,
+            box_threshold=self.config.box_threshold,
+            text_threshold=self.config.text_threshold,
             target_sizes=target_sizes,
         )
 

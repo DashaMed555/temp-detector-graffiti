@@ -1,0 +1,5 @@
+model_id: "IDEA-Research/grounding-dino-base"
+box_threshold: 0.5
+text_threshold: 0.5
+text_prompt: "graffiti . vandalism . street art ."
+max_length: 64

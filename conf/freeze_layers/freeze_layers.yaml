@@ -1,0 +1,4 @@
+freeze_layers: True
+encoder: True
+reference_points_head: True
+bbox_embed: True
