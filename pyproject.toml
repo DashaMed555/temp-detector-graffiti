@@ -20,7 +20,7 @@ build-backend = "poetry.core.masonry.api"
 graffiti-detector = "commands:cli"
 
 [tool.poetry.dependencies]
-torch = "^2.0.0"
+torch = "2.2.2"
 transformers = "4.54.1"
 numpy = "^1.24.0"
 pillow = "^10.0.0"
@@ -31,6 +31,8 @@ click = "^8.3.1"
 accelerate = ">=0.26.0"
 tensorboard = "^2.20.0"
 scipy = "^1.17.0"
+cryptography = "^42.0.0"
+pyopenssl = "^24.0.0"
 
 [tool.poetry.group.dev.dependencies]
 dvc = {version = "^3.0.0", extras = ["gdrive"]}
