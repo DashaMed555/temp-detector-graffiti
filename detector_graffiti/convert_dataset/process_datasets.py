@@ -1,23 +1,28 @@
 import os
 import random
 import shutil
-import yaml
 
+import fire
+import yaml
 from utils import image_extensions
 
 
 def process_datasets(
-    datasets_dir,
-    output_dataset_dir,
-    run_type,
-    percentage=1.0,
-    balance_classes=True
+    datasets_dir="data",
+    output_dataset_dir="dataset",
+    run_type="train",
+    percentage=0.01,
+    balance_classes=True,
 ):
     """
     Объединяет YOLO-датасеты с балансировкой по количеству bbox.
-    Классы:
-      0 — граффити
-      1 — вандализм
+
+    Args:
+        datasets_dir (str): Путь к исходным данным.
+        output_dataset_dir (str): Куда сохранять результат.
+        run_type (str): Тип выборки (train, valid, test).
+        percentage (float): Какую часть данных взять (0.0 до 1.0).
+        balance_classes (bool): Нужно ли балансировать классы.
     """
 
     output_images_dir = os.path.join(output_dataset_dir, "images")
@@ -28,13 +33,13 @@ def process_datasets(
 
     target_yaml_path = os.path.join(output_dataset_dir, "data.yaml")
     data_yaml = {
-        'train': './train/images',
-        'val': './valid/images',
-        'test': './test/images',
-        'nc': 2,
-        'names': ['graffiti', 'vandalism']
+        "train": "./train/images",
+        "val": "./valid/images",
+        "test": "./test/images",
+        "nc": 2,
+        "names": ["graffiti", "vandalism"],
     }
-    with open(target_yaml_path, 'w') as f:
+    with open(target_yaml_path, "w") as f:
         yaml.dump(data_yaml, f)
 
     global_counter = 0
@@ -55,14 +60,18 @@ def process_datasets(
                         c0 += 1
                     elif cls == 1:
                         c1 += 1
-                except:
-                    continue
+                except Exception as e:
+                    print(f"⚠️ Ошибка при чтении аннотации {path}: {e}")
         return c0, c1
 
     # ---------- Сбор всех изображений ----------
     items = []
 
-    print("📊 Сбор bbox-статистики...")
+    print(f"📊 Сбор bbox-статистики для {run_type}...")
+
+    if not os.path.exists(datasets_dir):
+        print(f"❌ Ошибка: Директория {datasets_dir} не найдена")
+        return
 
     for dataset_name in os.listdir(datasets_dir):
         dataset_path = os.path.join(datasets_dir, dataset_name)
@@ -83,21 +92,24 @@ def process_datasets(
             ann_path = os.path.join(labels_dir, base + ".txt")
             c0, c1 = analyze_annotation(ann_path)
 
-            items.append({
-                "img_path": os.path.join(images_dir, img_name),
-                "ann_path": ann_path,
-                "c0": c0,
-                "c1": c1
-            })
+            items.append(
+                {
+                    "img_path": os.path.join(images_dir, img_name),
+                    "ann_path": ann_path,
+                    "c0": c0,
+                    "c1": c1,
+                }
+            )
+
+    if not items:
+        print("⚠️  Изображения не найдены.")
+        return
 
     num_to_select = max(1, int(len(items) * percentage))
     items = random.sample(items, num_to_select)
 
-    total_0 = 0
-    total_1 = 0
-    for item in items:
-        total_0 += item['c0']
-        total_1 += item['c1']
+    total_0 = sum(item["c0"] for item in items)
+    total_1 = sum(item["c1"] for item in items)
 
     print(f"📦 Кандидатов изображений: {len(items)}")
 
@@ -131,7 +143,7 @@ def process_datasets(
     # Итоговая статистика
     total_0 = sum(item["c0"] for item in selected)
     total_1 = sum(item["c1"] for item in selected)
-    print(f"Выбранных изображений: {len(selected)}")
+    print(f"✅ Выбранных изображений: {len(selected)}")
     print("📊 Итоговая bbox-статистика:")
     print(f"   Граффити (0): {total_0}")
     print(f"   Вандализм (1): {total_1}")
@@ -158,24 +170,8 @@ def process_datasets(
 
         global_counter += 1
 
-    print("✅ Балансировка по bbox завершена")
-    print(f"📁 Изображения: {output_images_dir}")
-    print(f"📁 Аннотации: {output_labels_dir}")
+    print("🚀 Обработка завершена")
 
 
-if __name__ == '__main__':
-    run_type = 'train'
-
-    # Настройки путей
-    datasets_directory = "data"
-    output_dataset_dir = "dataset"
-    percentage = 0.01
-
-    # Запуск обработки с балансировкой
-    process_datasets(
-        datasets_directory,
-        output_dataset_dir,
-        run_type,
-        percentage,
-        balance_classes=True
-    )
+if __name__ == "__main__":
+    fire.Fire(process_datasets)

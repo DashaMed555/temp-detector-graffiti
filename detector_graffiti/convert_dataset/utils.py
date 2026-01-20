@@ -1,22 +1,28 @@
 import os
+
+import fire
 from PIL import Image
 
-image_extensions = ('.png', '.jpg', '.jpeg', '.bmp', '.tiff')
-class_names = ['graffiti', 'vandalism']
+image_extensions = (".png", ".jpg", ".jpeg", ".bmp", ".tiff")
+class_names = ["graffiti", "vandalism"]
+
 
 def parse_yolo_annotation(annotation_path):
     """
-    Парсит YOLO аннотацию и возвращает список bbox'ов
+    Парсит YOLO аннотацию и возвращает список bbox'ов.
+
+    Args:
+        annotation_path (str): Путь к текстовому файлу аннотации.
     """
     annotations = []
-    
+
     if not os.path.exists(annotation_path):
         return annotations
-    
+
     try:
-        with open(annotation_path, 'r') as f:
+        with open(annotation_path, "r") as f:
             lines = f.readlines()
-        
+
         for line in lines:
             line = line.strip()
             if line:
@@ -33,23 +39,37 @@ def parse_yolo_annotation(annotation_path):
 
                     if w <= 0 or h <= 0:
                         continue
-                    
-                    annotations.append({
-                        "label_name": class_names[class_id],
-                        "cx": cx,
-                        "cy": cy,
-                        "w": w,
-                        "h": h
-                    })
-    
+
+                    annotations.append(
+                        {
+                            "label_name": class_names[class_id],
+                            "cx": cx,
+                            "cy": cy,
+                            "w": w,
+                            "h": h,
+                        }
+                    )
+
     except Exception as e:
         print(f"❌ Ошибка при чтении файла {annotation_path}: {e}")
-    
+
     return annotations
 
+
 def get_image_dimensions(image_path):
+    """
+    Возвращает ширину и высоту изображения.
+
+    Args:
+        image_path (str): Путь к файлу изображения.
+    """
     try:
         with Image.open(image_path) as img:
             return img.width, img.height
-    except:
+    except Exception as e:
+        print(f"⚠️ Не удалось определить размер {image_path}: {e}")
         return 640, 480
+
+
+if __name__ == "__main__":
+    fire.Fire()

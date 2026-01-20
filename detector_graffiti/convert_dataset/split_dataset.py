@@ -1,16 +1,17 @@
-import random
 import os
+import random
 import shutil
 
+import fire
 from utils import image_extensions
 
 
 def split_dataset(
-    dataset_dir,
+    dataset_dir="dataset",
     train_ratio=0.6,
     val_ratio=0.2,
     test_ratio=0.2,
-    seed=42
+    seed=42,
 ):
     """
     Делит датасет на train / val / test.
@@ -20,19 +21,25 @@ def split_dataset(
         labels/
     """
 
-    assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-6, \
-        "Сумма коэффициентов должна быть равна 1.0"
+    assert (
+        abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-6
+    ), "Сумма коэффициентов должна быть равна 1.0"
 
     images_dir = os.path.join(dataset_dir, "images")
     labels_dir = os.path.join(dataset_dir, "labels")
 
     if not os.path.isdir(images_dir):
-        raise FileNotFoundError(f"Не найдена папка с изображениями: {images_dir}")
+        raise FileNotFoundError(
+            f"Не найдена папка с изображениями: {images_dir}"
+        )
     if not os.path.isdir(labels_dir):
-        raise FileNotFoundError(f"Не найдена папка с аннотациями: {labels_dir}")
+        raise FileNotFoundError(
+            f"Не найдена папка с аннотациями: {labels_dir}"
+        )
 
     image_files = [
-        f for f in os.listdir(images_dir)
+        f
+        for f in os.listdir(images_dir)
         if f.lower().endswith(image_extensions)
     ]
 
@@ -45,11 +52,12 @@ def split_dataset(
     total = len(image_files)
     n_train = int(total * train_ratio)
     n_val = int(total * val_ratio)
+    val_slice_end = n_train + n_val
 
     splits = {
         "train": image_files[:n_train],
-        "valid": image_files[n_train:n_train + n_val],
-        "test": image_files[n_train + n_val:]
+        "valid": image_files[n_train:val_slice_end],
+        "test": image_files[val_slice_end:],
     }
 
     for split, files in splits.items():
@@ -77,10 +85,6 @@ def split_dataset(
     for k, v in splits.items():
         print(f"   {k}: {len(v)} изображений")
 
-    shutil.rmtree(images_dir)
-    shutil.rmtree(labels_dir)
-
 
 if __name__ == "__main__":
-    output_dataset_dir = "dataset"
-    split_dataset(output_dataset_dir)
+    fire.Fire(split_dataset)
