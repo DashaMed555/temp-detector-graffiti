@@ -18,7 +18,7 @@ from ..grounding_dino_trainer.trainer import GroundingDINOTrainer
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
     output_dir = os.path.join(config.validation.output_dir, current_time)
     os.makedirs(output_dir, exist_ok=True)
 
@@ -57,7 +57,6 @@ def main(config: DictConfig):
         optim=config_val.optim,
         save_strategy=config_val.save_strategy,
         load_best_model_at_end=config_val.load_best_model_at_end,
-        bf16=config_val.bf16,
         dataloader_pin_memory=config_val.dataloader_pin_memory,
         logging_dir=os.path.join(output_dir, "logs"),
         report_to=config_val.report_to,

@@ -1,5 +1,3 @@
-from transformers import AutoProcessor
+import os
 
-model_id = "./model"
-
-processor = AutoProcessor.from_pretrained(model_id)
+os.environ["HYDRA_FULL_ERROR"] = "1"
