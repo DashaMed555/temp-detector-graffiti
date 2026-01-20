@@ -40,7 +40,7 @@ class Inference:
         boxes = results["boxes"].detach().cpu().numpy()
         boxes = np.round(boxes).astype(np.int32)
         confidence = results["scores"].detach().cpu().numpy()
-        class_name = results["label"].detach().cpu().numpy()
+        class_name = results["labels"]
         result = [
             {"box": box, "class": cls, "confidence": conf}
             for box, cls, conf in zip(boxes, class_name, confidence)
@@ -89,7 +89,7 @@ def main(config: DictConfig):
         out_path = os.path.join(
             output_dir, f"detected_{os.path.basename(img_path)}"
         )
-        img_array.save(out_path)
+        cv2.imwrite(out_path, img_array)
 
 
 if __name__ == "__main__":

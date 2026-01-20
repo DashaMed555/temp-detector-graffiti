@@ -1,4 +1,4 @@
-ft_model_path: "path"
+ft_model_path: "models/grounding_dino_ft"
 output_dir: "runs/val"
 per_device_train_batch_size: 2
 per_device_eval_batch_size: 8
@@ -14,7 +14,6 @@ adam_beta2: 0.999
 optim: "adamw_torch"
 save_strategy: "best"
 load_best_model_at_end: True
-bf16: True
 dataloader_pin_memory: False
 logging_dir: "./logs"
 report_to: "tensorboard"

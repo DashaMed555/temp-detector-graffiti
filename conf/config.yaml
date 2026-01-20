@@ -2,8 +2,8 @@ defaults:
   - data_loading: data_loading
   - model: model
   - freeze_layers: freeze_layers
-  - fine_tuning: fine-tuning
+  - fine_tuning: fine_tuning
   - logging: logging
   - inference: inference
   - validation: validation
-  - onnx_converter: onnx-converter
+  - onnx_converter: onnx_converter

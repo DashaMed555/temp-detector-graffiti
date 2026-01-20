@@ -1,4 +1,4 @@
-train_json_path: "../dataset/train_annotations.json"
-val_json_path: "../dataset/train_annotations.json"
-train_image_path: "../dataset/images_train"
-val_image_path: "../dataset/images_train"
+train_json_path: "../../dataset_very_mini/dataset/train/annotations.json"
+val_json_path: "../../dataset_very_mini/dataset/valid/annotations.json"
+train_image_path: "../../dataset_very_mini/dataset/train/images"
+val_image_path: "../../dataset_very_mini/dataset/valid/images"

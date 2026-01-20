@@ -1,4 +1,7 @@
 [core]
-    remote = localremote
-['remote "localremote"']
-    url = ../../dvc_storage
+    remote = gdrive
+    autostage = true
+['remote "gdrive"']
+    url = gdrive://16qnVQ6bEKA4qN0DcGK4xOgxVgrk4nJDt
+    gdrive_client_id = 182475310063-hligltru4rqedvietohgcnlavqk12kmo.apps.googleusercontent.com
+    gdrive_client_secret = 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

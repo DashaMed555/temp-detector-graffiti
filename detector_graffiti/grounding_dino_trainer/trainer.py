@@ -47,14 +47,18 @@ class GroundingDINOTrainer(Trainer):
 
         return model_inputs
 
-    def compute_loss(self, model, inputs, return_outputs=False):
+    def compute_loss(
+        self, model, inputs, return_outputs=False, *args, **kwargs
+    ):
         device = model.device
         model_inputs = self._build_model_inputs(inputs, device)
         outputs = model(**model_inputs)
         loss = outputs["loss"]
         return (loss, outputs) if return_outputs else loss
 
-    def prediction_step(self, model, inputs, prediction_loss_only=False):
+    def prediction_step(
+        self, model, inputs, prediction_loss_only=False, ignore_keys=None
+    ):
         model.eval()
         device = model.device
 

@@ -14,13 +14,13 @@ from transformers import (
 from ..compute_metrics.compute_metrics import compute_metrics
 from ..dataloader.dataset import JsonDataset
 from ..dataloader.utils import DataCollator
-from ..freeze_layers import freeze_layers
+from ..freeze_layers.freeze_layers import freeze_layers
 from ..grounding_dino_trainer.trainer import GroundingDINOTrainer
 
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
     output_dir = os.path.join(config.fine_tuning.output_dir, current_time)
     os.makedirs(output_dir, exist_ok=True)
 
@@ -76,7 +76,6 @@ def main(config: DictConfig):
         optim=config_ft.optim,
         save_strategy=config_ft.save_strategy,
         load_best_model_at_end=config_ft.load_best_model_at_end,
-        bf16=config_ft.bf16,
         dataloader_pin_memory=config_ft.dataloader_pin_memory,
         logging_dir=os.path.join(output_dir, "logs"),
         report_to=config_ft.report_to,
