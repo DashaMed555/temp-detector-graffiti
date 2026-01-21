@@ -5,5 +5,4 @@ defaults:
   - fine_tuning: fine_tuning
   - logging: logging
   - inference: inference
-  - validation: validation
   - onnx_converter: onnx_converter

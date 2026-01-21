@@ -210,6 +210,7 @@ __marimo__/
 dataset
 difficult_dataset
 normal_dataset
+big_dataset
 data/Graffiti Detection.v1i.yolov11
 data/17k_Graffiti.v1i.yolov11
 data/train.v13i.yolov11

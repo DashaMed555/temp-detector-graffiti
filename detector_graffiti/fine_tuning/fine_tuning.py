@@ -23,6 +23,13 @@ from ..logging.logging import MLflowLogger
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
+    """
+    Main function for fine-tuning Grounding DINO model for graffiti detection.
+
+    Args:
+        config (DictConfig): Configuration object from Hydra containing all
+                            training, model, and data parameters
+    """
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
     output_dir = Path(config.fine_tuning.output_dir) / current_time
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -124,10 +131,26 @@ def main(config: DictConfig):
     logger.info("Init DataCollator")
 
     class MLflowCallback(TrainerCallback):
+        """
+        Custom callback for logging metrics to MLflow during training.
+
+        Args:
+            logger (MLflowLogger): Instance of MLflowLogger for logging metrics
+        """
+
         def __init__(self, logger):
             self.logger = logger
 
         def on_log(self, args, state, control, logs=None, **kwargs):
+            """
+            Callback method called when training logs are generated.
+
+            Args:
+                args (TrainingArguments): Training arguments
+                state (TrainerState): Current training state
+                control (TrainerControl): Training control object
+                logs (dict, optional): Dictionary of metrics to log
+            """
             if logs:
                 self.logger.log_metrics(logs)
 

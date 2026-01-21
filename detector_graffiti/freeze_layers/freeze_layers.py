@@ -2,6 +2,13 @@ import logging
 
 
 def freeze_layers(model, config):
+    """
+    Freeze specific layers of the Grounding DINO model based on configuration.
+
+    Args:
+        model (torch.nn.Module): Grounding DINO model to freeze layers of
+        config (DictConfig): Configuration object with freeze settings
+    """
     logger = logging.getLogger(__name__)
 
     logger.info("Start parameters freeze")
