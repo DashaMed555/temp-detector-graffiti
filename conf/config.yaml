@@ -1,5 +1,5 @@
 defaults:
-  - data_loading: data_loading
+  - data_loading: normal_dataset
   - model: model
   - freeze_layers: freeze_layers
   - fine_tuning: fine_tuning
