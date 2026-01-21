@@ -207,10 +207,10 @@ marimo/_lsp/
 __marimo__/
 
 # datasets
-dataset
-difficult_dataset
-normal_dataset
-big_dataset
+datasets/dataset
+datasets/difficult_dataset
+datasets/normal_dataset
+datasets/big_dataset
 data/Graffiti Detection.v1i.yolov11
 data/17k_Graffiti.v1i.yolov11
 data/train.v13i.yolov11

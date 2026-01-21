@@ -1,0 +1,5 @@
+outs:
+- md5: 6ede6c263ac9e245beba5e2d398b6a20
+  size: 18535861
+  hash: md5
+  path: big_dataset.zip
