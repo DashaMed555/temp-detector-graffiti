@@ -61,8 +61,11 @@ def split_dataset(
     }
 
     for split, files in splits.items():
-        img_out = os.path.join(dataset_dir, split, "images")
-        lbl_out = os.path.join(dataset_dir, split, "labels")
+        split_dir = os.path.join(dataset_dir, split)
+        if os.path.exists(split_dir):
+            shutil.rmtree(split_dir)
+        img_out = os.path.join(split_dir, "images")
+        lbl_out = os.path.join(split_dir, "labels")
         os.makedirs(img_out, exist_ok=True)
         os.makedirs(lbl_out, exist_ok=True)
 
