@@ -1,4 +1,4 @@
-train_json_path: "dataset/dataset/train/annotations.json"
-val_json_path: "dataset/dataset/valid/annotations.json"
-train_image_path: "dataset/dataset/train/images"
-val_image_path: "dataset/dataset/valid/images"
+train_json_path: "normal_dataset/normal_dataset/train/annotations.json"
+val_json_path: "normal_dataset/normal_dataset/valid/annotations.json"
+train_image_path: "normal_dataset/normal_dataset/train/images"
+val_image_path: "normal_dataset/normal_dataset/valid/images"

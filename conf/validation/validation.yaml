@@ -13,10 +13,9 @@ weight_decay: 3e-6
 adam_beta2: 0.999
 optim: "adamw_torch"
 save_strategy: "best"
+report_to: "none"
 load_best_model_at_end: True
 dataloader_pin_memory: False
-logging_dir: "./logs"
-report_to: "tensorboard"
 logging_strategy: "epoch"
 metric_for_best_model: "f1"
 greater_is_better: True

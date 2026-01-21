@@ -1,6 +1,5 @@
 output_dir: "runs/inference"
-images_path: "dataset/dataset/test/images"
-model_path: "runs/fine-tuning/2026-01-20 23-29-49/ft_model"
+images_path: "difficult_dataset/difficult_dataset//train/images"
+model_path: "runs/fine-tuning/2026-01-21 18-13-57/ft_model"
 prompt: "legal graffiti . illegal graffiti ."
-box_threshold: 0.5
-text_threshold: 0.5
+threshold: 0.5

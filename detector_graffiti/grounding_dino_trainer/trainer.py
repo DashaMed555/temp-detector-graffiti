@@ -80,13 +80,12 @@ class GroundingDINOTrainer(Trainer):
         results = self.processor.post_process_grounded_object_detection(
             outputs,
             input_ids=input_ids,
-            box_threshold=self.config.box_threshold,
-            text_threshold=self.config.text_threshold,
+            threshold=self.config.threshold,
             target_sizes=target_sizes,
         )
 
         preds = [
-            torch.tensor(r["boxes"], dtype=torch.float32, device=device)
+            r["boxes"].detach().clone().to(device=device, dtype=torch.float32)
             for r in results
         ]
 

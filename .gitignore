@@ -209,6 +209,10 @@ __marimo__/
 # dataset
 /dataset.zip
 dataset
+difficult_dataset.zip
+difficult_dataset
+normal_dataset
+normal_dataset.zip
 
 #outputs
 /outputs

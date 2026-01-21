@@ -80,10 +80,9 @@ def main(config: DictConfig):
         adam_beta2=config_ft.adam_beta2,
         optim=config_ft.optim,
         save_strategy=config_ft.save_strategy,
+        report_to="none",
         load_best_model_at_end=config_ft.load_best_model_at_end,
         dataloader_pin_memory=config_ft.dataloader_pin_memory,
-        logging_dir=str(output_dir / "logs"),
-        report_to=config_ft.report_to,
         logging_strategy=config_ft.logging_strategy,
         metric_for_best_model=config_ft.metric_for_best_model,
         greater_is_better=config_ft.greater_is_better,
@@ -98,9 +97,7 @@ def main(config: DictConfig):
 
         def on_log(self, args, state, control, logs=None, **kwargs):
             if logs:
-                self.logger.log_metrics(
-                    logs, step=logs.get("step") if logs else None
-                )
+                self.logger.log_metrics(logs)
 
     callbacks_list = []
     callbacks_list.append(MLflowCallback(mlflow_logger))

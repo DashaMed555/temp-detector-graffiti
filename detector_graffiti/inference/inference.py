@@ -23,24 +23,27 @@ class Inference:
         target_size = [frames.shape[:2]]
         prompt = self.prompt * batch_size
         inputs = self.processor(
-            images=frames, text=prompt, return_tensors="pt"
+            images=frames, text=prompt, return_tensors="pt", truncation=True
         )
         inputs.to(self.device)
 
         with torch.no_grad():
-            outputs = self.model(**inputs)
+            outputs = self.model(
+                input_ids=inputs["input_ids"],
+                attention_mask=inputs.get("attention_mask"),
+                pixel_values=inputs["pixel_values"],
+            )
 
         results = self.processor.post_process_grounded_object_detection(
             outputs,
             inputs.input_ids,
-            box_threshold=self.config.box_threshold,
-            text_threshold=self.config.text_threshold,
+            threshold=self.config.threshold,
             target_sizes=target_size * batch_size,
         )[0]
         boxes = results["boxes"].detach().cpu().numpy()
         boxes = np.round(boxes).astype(np.int32)
         confidence = results["scores"].detach().cpu().numpy()
-        class_name = results["labels"]
+        class_name = results["text_labels"]
         result = [
             {"box": box, "class": cls, "confidence": conf}
             for box, cls, conf in zip(boxes, class_name, confidence)

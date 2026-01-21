@@ -18,11 +18,10 @@ class MLflowLogger:
             "eval_precision",
             "eval_recall",
             "eval_f1",
-            "train_loss",
+            "loss",
         ]
 
         self.metrics_history = {}
-        self.steps = []
 
         self.plots_dir = Path(output_dir) / config.logging.plots_dir
         self.plots_dir.mkdir(exist_ok=True)
@@ -30,15 +29,11 @@ class MLflowLogger:
     def start_run(self, run_name):
         self.run = mlflow.start_run(run_name=run_name)
         mlflow.log_param("git_commit", self.git_commit)
-        mlflow.log_param(
-            "batch_size", self.config.fine_tuning.per_device_train_batch_size
-        )
-        mlflow.log_param(
-            "learning_rate", self.config.fine_tuning.learning_rate
-        )
-        mlflow.log_param("epochs", self.config.fine_tuning.num_train_epochs)
+        for key, value in self.config.fine_tuning.items():
+            if isinstance(value, int) or isinstance(value, float):
+                mlflow.log_param(key, value)
 
-    def log_metrics(self, logs, step=None):
+    def log_metrics(self, logs):
         metrics_to_log = {}
         for key in self.metrics:
             if key in logs:
@@ -48,14 +43,15 @@ class MLflowLogger:
                 if key not in self.metrics_history:
                     self.metrics_history[key] = []
                 self.metrics_history[key].append(float(value))
+
         if metrics_to_log:
-            mlflow.log_metrics(metrics_to_log, step=step)
-            if step is not None:
-                self.steps.append(step)
+            for key, value in metrics_to_log.items():
+                if key in self.metrics:
+                    mlflow.log_metric(key, value, step=int(logs["epoch"]))
 
     def save_plots(self):
         self._create_plots(
-            ["train_loss", "eval_loss"],
+            ["loss", "eval_loss"],
             "loss_plot.png",
             "Training and Validation Loss",
         )
@@ -71,17 +67,13 @@ class MLflowLogger:
     def _create_plots(self, metric_names, filename, title):
         plt.figure(figsize=(8, 5))
 
-        for number, metric in enumerate(metric_names):
+        for metric in metric_names:
             if metric in self.metrics_history:
                 values = self.metrics_history[metric]
-                x = (
-                    self.steps[: len(values)]
-                    if self.steps
-                    else range(len(values))
-                )
+                x = list(range(1, len(values) + 1))
                 plt.plot(x, values, label=metric)
 
-        plt.xlabel("Step")
+        plt.xlabel("Epoch")
         plt.ylabel("Value")
         plt.title(title)
         plt.legend()
