@@ -1,5 +1,0 @@
-ft_model_id: "models/grounding_dino_ft"
-image_path: "../../dataset/dataset/002350.png"
-image_size: (800, 800)
-prompt: "graffiti . vandalism . street art ."
-max_length: 64
