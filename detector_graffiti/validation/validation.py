@@ -63,6 +63,7 @@ def main(config: DictConfig):
         metric_for_best_model=config_val.metric_for_best_model,
         greater_is_better=config_val.greater_is_better,
         lr_scheduler_type=config_val.lr_scheduler_type,
+        disable_tqdm=config_val.disable_tqdm,
     )
 
     model = GroundingDinoForObjectDetection.from_pretrained(

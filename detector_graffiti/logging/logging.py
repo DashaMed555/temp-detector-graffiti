@@ -19,6 +19,7 @@ class MLflowLogger:
             "eval_recall",
             "eval_f1",
             "loss",
+            "train_loss",
         ]
 
         self.metrics_history = {}

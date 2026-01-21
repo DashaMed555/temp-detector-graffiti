@@ -1,3 +1,6 @@
+import datetime
+import logging
+import time
 from pathlib import Path
 
 import cv2
@@ -11,13 +14,23 @@ from transformers import AutoProcessor
 
 
 class Inference:
-    def __init__(self, config):
+    def __init__(self, config, logger):
         self.config = config
+        self.logger = logger
+
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.logger.info(f"Use device: {self.device}")
+
         self.processor = AutoProcessor.from_pretrained(config.model_path)
+        self.logger.info(f"Load processor from: {config.model_path}")
+
         self.model = GDModel.from_pretrained(config.model_path)
+        self.logger.info(f"Load model from: {config.model_path}")
         self.model.to(self.device)
+
         self.prompt = [config.prompt]
+        self.logger.info(f"Prompt: {self.prompt[0]}")
+        self.logger.info(f"Detection threshold: {config.threshold}")
 
     def run(self, frames, batch_size=1):
         target_size = [frames.shape[:2]]
@@ -27,6 +40,8 @@ class Inference:
         )
         inputs.to(self.device)
 
+        inference_start = time.time()
+
         with torch.no_grad():
             outputs = self.model(
                 input_ids=inputs["input_ids"],
@@ -34,12 +49,16 @@ class Inference:
                 pixel_values=inputs["pixel_values"],
             )
 
+        inference_time = time.time() - inference_start
+        self.logger.debug(f"Inference time: {inference_time:.3f}s")
+
         results = self.processor.post_process_grounded_object_detection(
             outputs,
             inputs.input_ids,
             threshold=self.config.threshold,
             target_sizes=target_size * batch_size,
         )[0]
+
         boxes = results["boxes"].detach().cpu().numpy()
         boxes = np.round(boxes).astype(np.int32)
         confidence = results["scores"].detach().cpu().numpy()
@@ -55,32 +74,65 @@ class Inference:
 def main(config: DictConfig):
     inf_config = config.inference
 
-    inference = Inference(inf_config)
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    output_dir = Path(inf_config.output_dir) / current_time
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    logger = logging.getLogger(__name__)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(
+                str(output_dir / "inference.log"), encoding="utf-8"
+            ),
+            logging.StreamHandler(),
+        ],
+        force=True,
+    )
+    logger.info("Start inference")
+    logger.info(f"Output directory: {output_dir}")
+
+    inference = Inference(inf_config, logger)
+    logger.info("Init inference")
 
     input_dir = Path(inf_config.images_path)
-    output_dir = Path(inf_config.output_dir)
+    logger.info(f"Input directory: {input_dir}")
 
     if not input_dir.exists():
         raise ValueError(f"Directory {input_dir} does not exist")
 
+    output_dir = output_dir / "images"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     image_files = []
-    for f in input_dir.iterdir():
-        if f.is_file() and f.suffix.lower() in {".jpg", ".jpeg", ".png"}:
-            image_files.append(f)
+    valid_extensions = {".jpg", ".jpeg", ".png"}
+    for img_path in input_dir.iterdir():
+        if img_path.is_file() and img_path.suffix.lower() in valid_extensions:
+            image_files.append(img_path)
+
+    logger.info("Starting image processing")
+    processed_count = 0
 
     for img_path in image_files:
+        name = img_path.name
+        logger.info(
+            f"[{processed_count}/{len(image_files)}] Processing: {name}"
+        )
         img = Image.open(img_path).convert("RGB")
         img_array = np.array(img)
-        result = inference.run(np.array(img_array))
+        img_brg = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+        result = inference.run(np.array(img_brg))
         if result:
+            logger.info(f"Found {len(result)} detections")
             for det in result:
                 x1, y1, x2, y2 = det["box"]
                 text = f"{det['class']}: {det['confidence']:.2f}"
-                cv2.rectangle(img_array, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                cv2.rectangle(img_brg, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 cv2.putText(
-                    img_array,
+                    img_brg,
                     text,
                     (x1, y1 - 5),
                     cv2.FONT_HERSHEY_SIMPLEX,
@@ -88,9 +140,10 @@ def main(config: DictConfig):
                     (0, 0, 255),
                     2,
                 )
+        processed_count += 1
 
         out_path = output_dir / f"detected_{img_path.stem}{img_path.suffix}"
-        cv2.imwrite(str(out_path), img_array)
+        cv2.imwrite(str(out_path), img_brg)
 
 
 if __name__ == "__main__":

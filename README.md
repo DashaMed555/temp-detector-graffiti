@@ -6,22 +6,26 @@
 
 Ссылка на hugging face репозиторий модели: https://huggingface.co/IDEA-Research/grounding-dino-base.
 
-
 # Prerequisits
+
 - poetry:
+
 ```
 pip install poetry
 ```
 
 # Установка и настройка
+
 1. Клонирование репозитория:
 
 Через SSH:
+
 ```
 git clone git@github.com:DashaMed555/temp-detector-graffiti.git
 ```
 
 Через HTTPS:
+
 ```
 git clone https://github.com/DashaMed555/temp-detector-graffiti.git
 ```
@@ -50,35 +54,42 @@ poetry run dvc remote modify gdrive --local gdrive_client_secret "<CLIENT_SECRET
 poetry run dvc pull
 ```
 
+# Работа с пакетом _convert_dataset_
 
-# Работа с пакетом *convert_dataset*
 1. Обработка нескольких датасетов: слияние в один датасет и балансировка классов:
+
 ```
 poetry run python detector_graffiti/convert_dataset/process_datasets.py
 ```
 
 2. Разделение датасета на тренировочную, валидационную и тестовую выборки:
+
 ```
 poetry run python detector_graffiti/convert_dataset/split_dataset.py
 ```
 
 3. Конвертация YOLO аннотаций в JSON формат:
+
 ```
 poetry run python detector_graffiti/convert_dataset/convert_yolo_to_json.py
 ```
 
 4. Валидация JSON аннотаций:
+
 ```
 poetry run python detector_graffiti/convert_dataset/validate.py
 ```
 
 # Работа с моделью
+
 - Запуск тренировки:
+
 ```
 poetry run graffiti-detector train
 ```
 
 - Запуск инференса:
+
 ```
 poetry run graffiti-detector inference
 ```
