@@ -1,6 +1,0 @@
-outs:
-- md5: ed71791d5a82e8b936674215334ca4b2.dir
-  size: 22009141
-  nfiles: 1419
-  hash: md5
-  path: train.v13i.yolov11

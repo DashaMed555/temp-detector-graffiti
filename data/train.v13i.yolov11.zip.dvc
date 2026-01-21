@@ -1,0 +1,5 @@
+outs:
+- md5: 4a064d425a17741a102175f72a6ce5b7
+  size: 22277293
+  hash: md5
+  path: train.v13i.yolov11.zip

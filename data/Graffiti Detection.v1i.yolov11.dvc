@@ -1,6 +1,0 @@
-outs:
-- md5: 4f90ddc8f0a802f9d6cab411f31d5c5f.dir
-  size: 19646659
-  nfiles: 609
-  hash: md5
-  path: Graffiti Detection.v1i.yolov11
