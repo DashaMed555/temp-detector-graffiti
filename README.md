@@ -7,7 +7,7 @@
 Ссылка на hugging face репозиторий модели: https://huggingface.co/IDEA-Research/grounding-dino-base.
 
 
-# Prerequisits:
+# Prerequisits
 - poetry:
 ```
 pip install poetry
@@ -51,7 +51,7 @@ poetry run dvc pull
 ```
 
 
-# Работа с пакетом *convert_dataset*:
+# Работа с пакетом *convert_dataset*
 1. Обработка нескольких датасетов: слияние в один датасет и балансировка классов:
 ```
 poetry run detector_graffiti/convert_dataset/process_datasets.py
