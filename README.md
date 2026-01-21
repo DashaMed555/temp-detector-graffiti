@@ -71,3 +71,14 @@ poetry run detector_graffiti/convert_dataset/convert_yolo_to_json.py
 ```
 poetry run detector_graffiti/convert_dataset/validate.py
 ```
+
+# Работа с моделью
+- Запуск тренировки:
+```
+poetry run graffiti-detector train
+```
+
+- Запуск инференса:
+```
+poetry run graffiti-detector inference
+```
