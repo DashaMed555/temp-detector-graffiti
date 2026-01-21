@@ -9,7 +9,7 @@ from utils import image_extensions
 
 def process_datasets(
     datasets_dir="data",
-    output_dataset_dir="dataset",
+    output_dataset_dir="datasets/dataset",
     run_type="train",
     percentage=0.01,
     balance_classes=True,
