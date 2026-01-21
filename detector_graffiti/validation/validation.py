@@ -1,6 +1,6 @@
 import datetime
 import json
-import os
+from pathlib import Path
 
 import hydra
 from omegaconf import DictConfig
@@ -19,8 +19,8 @@ from ..grounding_dino_trainer.trainer import GroundingDINOTrainer
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-    output_dir = os.path.join(config.validation.output_dir, current_time)
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = Path(config.validation.output_dir) / current_time
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     with open(config.data_loading.val_json_path, "r") as f:
         val_data = json.load(f)
@@ -42,7 +42,7 @@ def main(config: DictConfig):
     config_val = config.validation
 
     args = TrainingArguments(
-        output_dir=os.path.join(output_dir, "checkpoints"),
+        output_dir=str(output_dir / "checkpoints"),
         per_device_train_batch_size=config_val.per_device_train_batch_size,
         per_device_eval_batch_size=config_val.per_device_eval_batch_size,
         eval_accumulation_steps=config_val.eval_accumulation_steps,
@@ -58,7 +58,7 @@ def main(config: DictConfig):
         save_strategy=config_val.save_strategy,
         load_best_model_at_end=config_val.load_best_model_at_end,
         dataloader_pin_memory=config_val.dataloader_pin_memory,
-        logging_dir=os.path.join(output_dir, "logs"),
+        logging_dir=str(output_dir / "logs"),
         report_to=config_val.report_to,
         logging_strategy=config_val.logging_strategy,
         metric_for_best_model=config_val.metric_for_best_model,

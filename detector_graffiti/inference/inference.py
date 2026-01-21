@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import cv2
 import hydra
@@ -54,18 +54,18 @@ def main(config: DictConfig):
 
     inference = Inference(inf_config)
 
-    input_dir = inf_config.images_path
-    output_dir = inf_config.output_dir
+    input_dir = Path(inf_config.images_path)
+    output_dir = Path(inf_config.output_dir)
 
-    if not os.path.exists(input_dir):
+    if not input_dir.exists():
         raise ValueError(f"Directory {input_dir} does not exist")
 
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     image_files = []
-    for f in os.listdir(input_dir):
-        if f.lower().endswith((".jpg", ".jpeg", ".png", ".bmp")):
-            image_files.append(os.path.join(input_dir, f))
+    for f in input_dir.iterdir():
+        if f.is_file() and f.suffix.lower() in {".jpg", ".jpeg", ".png"}:
+            image_files.append(f)
 
     for img_path in image_files:
         img = Image.open(img_path).convert("RGB")
@@ -86,10 +86,8 @@ def main(config: DictConfig):
                     2,
                 )
 
-        out_path = os.path.join(
-            output_dir, f"detected_{os.path.basename(img_path)}"
-        )
-        cv2.imwrite(out_path, img_array)
+        out_path = output_dir / f"detected_{img_path.stem}{img_path.suffix}"
+        cv2.imwrite(str(out_path), img_array)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 import json
-import os
+from pathlib import Path
 
 import torch
 from PIL import Image
@@ -31,11 +31,11 @@ class JsonDataset(Dataset):
                 boxes = torch.zeros((0, 4), dtype=torch.float32)
                 class_labels = torch.zeros((0,), dtype=torch.long)
 
-            image_name = os.path.join(self.image_path, entry["image_name"])
+            image_name = Path(self.image_path) / entry["image_name"]
 
             self.items.append(
                 {
-                    "image_path": image_name,
+                    "image_path": str(image_name),
                     "size": (h, w),
                     "boxes": boxes,
                     "class_labels": class_labels,
