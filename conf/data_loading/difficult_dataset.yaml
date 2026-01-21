@@ -1,0 +1,4 @@
+train_json_path: "difficult_dataset/difficult_dataset/train/annotations.json"
+val_json_path: "difficult_dataset/difficult_dataset/valid/annotations.json"
+train_image_path: "difficult_dataset/difficult_dataset/train/images"
+val_image_path: "difficult_dataset/difficult_dataset/valid/images"
