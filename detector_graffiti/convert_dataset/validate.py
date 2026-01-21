@@ -1,6 +1,8 @@
 import json
+import logging
 import random
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import cv2
 import hydra
@@ -10,30 +12,53 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from utils import class_names
 
+# Initialize the logger for this module
+logger = logging.getLogger(__name__)
+
 
 def draw_bboxes_on_image(
-    image_path, annotations, output_path=None, show_image=True
-):
+    image_path: Union[str, Path],
+    annotations: List[Dict[str, Any]],
+    output_path: Optional[Union[str, Path]] = None,
+    show_image: bool = True,
+) -> Optional[np.ndarray]:
     """
-    Рисует bounding boxes на изображении
+    Draws bounding boxes on an image based on provided annotations.
+
+    Args:
+        image_path: Path to the input image file.
+        annotations: A list of dictionaries containing annotation data
+            (cx, cy, w, h, label_name).
+        output_path: Path where the resulting image will be saved.
+            Defaults to None.
+        show_image: Whether to display the image using matplotlib.
+            Defaults to True.
+
+    Returns:
+        The image in RGB format as a numpy array if successful, None otherwise.
     """
     image_path = Path(image_path)
+    # Define colors for specific classes (B, G, R format for OpenCV)
     colors = {class_names[0]: (255, 0, 0), class_names[1]: (0, 0, 255)}
 
+    # Read image using OpenCV
     img = cv2.imread(str(image_path))
     if img is None:
-        print(f"❌ Не удалось прочитать изображение: {image_path}")
-        return
+        logger.error("Failed to read image: %s", image_path)
+        return None
 
+    # Convert to RGB for matplotlib and processing
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img_height, img_width = img.shape[:2]
 
     for ann in annotations:
+        # Convert normalized coordinates to pixel coordinates
         cx = ann["cx"] * img_width
         cy = ann["cy"] * img_height
         w = ann["w"] * img_width
         h = ann["h"] * img_height
 
+        # Calculate box corners and clip to image boundaries
         x1 = int(np.clip(cx - w / 2, 0, img_width - 1))
         y1 = int(np.clip(cy - h / 2, 0, img_height - 1))
         x2 = int(np.clip(cx + w / 2, 0, img_width - 1))
@@ -43,15 +68,10 @@ def draw_bboxes_on_image(
             continue
 
         label = ann["label_name"]
-        color = colors.get(label, (0, 255, 0))
+        color = colors.get(label, (0, 255, 0))  # Default to green if not found
 
-        cv2.rectangle(
-            img_rgb,
-            (x1, y1),
-            (x2, y2),
-            color,
-            2,
-        )
+        # Draw rectangle and text label
+        cv2.rectangle(img_rgb, (x1, y1), (x2, y2), color, 2)
         cv2.putText(
             img_rgb,
             label,
@@ -62,18 +82,18 @@ def draw_bboxes_on_image(
             2,
         )
 
+    # Save to disk if output_path is provided
     if output_path:
         output_path = Path(output_path)
         img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
         cv2.imwrite(str(output_path), img_bgr)
-        print(f"💾 Изображение с bbox сохранено: {output_path}")
+        logger.info("Bbox image saved to: %s", output_path)
 
+    # Display using matplotlib
     if show_image:
         plt.figure(figsize=(12, 8))
         plt.imshow(img_rgb)
-        plt.title(
-            (f"Image: {image_path.name}\n" f"BBoxes: {len(annotations)}")
-        )
+        plt.title(f"Image: {image_path.name}\nBBoxes: {len(annotations)}")
         plt.axis("off")
         plt.tight_layout()
         plt.show()
@@ -82,26 +102,27 @@ def draw_bboxes_on_image(
 
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
-def validate_with_visualization(config: DictConfig):
+def validate_with_visualization(config: DictConfig) -> None:
     """
-    Визуальная проверка аннотаций с отрисовкой bounding boxes.
+    Performs visual validation of dataset annotations by drawing bboxes
+    on random samples.
 
     Args:
-        dataset_dir (str): Путь к папке с датасетом.
-        run_type (str): Тип выборки ('train', 'valid' или 'test').
-        num_samples (int): Количество случайных изображений для проверки.
-        save_dir (str, optional): Папка для сохранения результатов.
+        config: Hydra DictConfig object containing dataset and
+            validation parameters.
     """
+    # Get the original working directory since Hydra changes it
     project_root = Path(get_original_cwd())
 
+    # Resolve paths from configuration
     dataset_path = project_root / config.data_loading.root
-
     run_type = config.validation.run_type
     num_samples = config.validation.num_samples
 
     json_path = dataset_path / run_type / "annotations.json"
     images_dir = dataset_path / run_type / "images"
 
+    # Setup output directory for visualizations if requested
     save_dir = None
     if config.validation.save_dir:
         save_dir = project_root / config.validation.save_dir
@@ -109,18 +130,19 @@ def validate_with_visualization(config: DictConfig):
 
     try:
         if not json_path.exists():
-            print(f"❌ Файл аннотаций не найден: {json_path}")
+            logger.error("Annotation file not found: %s", json_path)
             return
 
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        print(
-            f"🔍 Визуальная проверка {num_samples} "
-            f"случайных примеров из {run_type}..."
+        logger.info(
+            "Visual validation of %d random samples from '%s'...",
+            num_samples,
+            run_type,
         )
 
-        # Выбираем случайные примеры
+        # Select random samples for visualization
         samples_to_check = random.sample(data, min(num_samples, len(data)))
 
         for i, item in enumerate(samples_to_check):
@@ -128,13 +150,18 @@ def validate_with_visualization(config: DictConfig):
             image_path = images_dir / image_name
             annotations = item["annotations"]
 
-            print(f"\n📋 Пример {i+1}/{len(samples_to_check)}:")
-            print(f"   Изображение: {image_name}")
-            print(f"   Размер: {item['width']}x{item['height']}")
-            print(f"   Аннотаций: {len(annotations)}")
+            logger.info(
+                "Sample %d/%d: %s | Dimensions: %dx%d | BBoxes: %d",
+                i + 1,
+                len(samples_to_check),
+                image_name,
+                item["width"],
+                item["height"],
+                len(annotations),
+            )
 
             if not image_path.exists():
-                print(f"❌ Изображение не найдено: {image_path}")
+                logger.warning("Image not found: %s", image_path)
                 continue
 
             output_path = None
@@ -142,25 +169,29 @@ def validate_with_visualization(config: DictConfig):
                 output_name = f"visualization_{Path(image_name).stem}.png"
                 output_path = save_dir / output_name
 
+            # Log coordinates for the first annotation if available
             if annotations:
-                print("   Координаты первой аннотации (нормализованные):")
-                print(f"     cx: {annotations[0]['cx']:.6f}")
-                print(f"     cy: {annotations[0]['cy']:.6f}")
-                print(f"     w: {annotations[0]['w']:.6f}")
-                print(f"     h: {annotations[0]['h']:.6f}")
+                first = annotations[0]
+                logger.debug(
+                    "First annotation: cx=%.4f, cy=%.4f, w=%.4f, h=%.4f",
+                    first["cx"],
+                    first["cy"],
+                    first["w"],
+                    first["h"],
+                )
 
+            # Draw and show
             draw_bboxes_on_image(
                 image_path, annotations, output_path, show_image=True
             )
 
+            # Pause until Enter (skip for last)
             if i < len(samples_to_check) - 1:
-                msg = "\n⌨️  Нажмите Enter для просмотра следующего фото..."
-                input(msg)
+                input("\n⌨️ Press Enter for the next image...")
 
     except Exception as e:
-        print(f"❌ Ошибка при визуальной проверке: {e}")
+        logger.exception(f"Unexpected error during visual validation: {e}")
 
 
-# Основная функция
 if __name__ == "__main__":
     validate_with_visualization()

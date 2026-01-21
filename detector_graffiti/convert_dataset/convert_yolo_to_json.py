@@ -1,5 +1,7 @@
 import json
+import logging
 from pathlib import Path
+from typing import Any, Dict, List
 
 import hydra
 from hydra.utils import get_original_cwd
@@ -11,96 +13,113 @@ from utils import (
     parse_yolo_annotation,
 )
 
+# Initialize the logger for this module
+logger = logging.getLogger(__name__)
+
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
-def convert_yolo_to_json(config: DictConfig):
+def convert_yolo_to_json(config: DictConfig) -> None:
     """
-    Конвертирует YOLO аннотации в JSON формат.
+    Converts YOLO format annotations to a single JSON file for each
+    dataset split.
+    Uses standard logging for progress tracking and error reporting.
+
+    This function iterates through dataset splits (train, valid, test),
+    reads YOLO .txt labels, fetches image dimensions, and compiles everything
+    into a structured JSON format compatible with further processing.
 
     Args:
-        dataset_dir (str): Путь к директории с датасетом.
-    """
-    project_root = Path(get_original_cwd())
-    dataset_path = project_root / config.data_loading.root
+        config (DictConfig): Hydra configuration object containing:
+            - data_loading.root: Relative path to the dataset root.
+            - params.class_names: List of class names for mapping.
 
+    Returns:
+        None
+    """
+    # Ensure paths are project-relative
+    project_root: Path = Path(get_original_cwd())
+    dataset_path: Path = project_root / config.data_loading.root
+
+    # Process each split of the dataset
     for run_type in ["train", "valid", "test"]:
-        images_directory = dataset_path / run_type / "images"
-        labels_directory = dataset_path / run_type / "labels"
-        output_json_path = dataset_path / run_type / "annotations.json"
+        images_directory: Path = dataset_path / run_type / "images"
+        labels_directory: Path = dataset_path / run_type / "labels"
+        output_json_path: Path = dataset_path / run_type / "annotations.json"
 
         if not images_directory.exists():
-            print(f"Нет {run_type} директории")
+            logger.warning(
+                f"Directory for {run_type} not found at {images_directory}"
+            )
             continue
 
-        # Получаем список изображений
-        image_files = [
+        # Filter files by allowed image extensions
+        image_files: List[Path] = [
             f
             for f in images_directory.iterdir()
             if f.suffix.lower() in image_extensions
         ]
 
-        json_data = []
-        processed_count = 0
+        json_data: List[Dict[str, Any]] = []
+        processed_count: int = 0
 
-        print(f"🔍 Найдено {len(image_files)} изображений для обработки")
+        logger.info(f"Found {len(image_files)} images for '{run_type}' split")
 
         for image_path in sorted(image_files):
             try:
+                # Retrieve image resolution
                 width, height = get_image_dimensions(image_path)
 
-                annotation_path = (
+                # Map image file to its corresponding .txt annotation file
+                annotation_path: Path = (
                     labels_directory / image_path.with_suffix(".txt").name
                 )
 
-                annotations = parse_yolo_annotation(
+                # Parse YOLO format to internal representation
+                annotations: List[Dict[str, Any]] = parse_yolo_annotation(
                     annotation_path, config.params.class_names
                 )
 
-                image_data = {
-                    "image_name": image_path.name,
-                    "width": width,
-                    "height": height,
-                    "annotations": annotations,
-                }
-
-                json_data.append(image_data)
+                json_data.append(
+                    {
+                        "image_name": image_path.name,
+                        "width": width,
+                        "height": height,
+                        "annotations": annotations,
+                    }
+                )
                 processed_count += 1
 
                 if processed_count % 100 == 0:
-                    print(f"📊 Обработано {processed_count} изображений...")
+                    logger.info(f"Processed {processed_count} images...")
 
             except Exception as e:
-                print(
-                    "❌ Ошибка при обработке изображения "
-                    f"{image_path.name}: {e}"
-                )
+                logger.error(f"Error processing image {image_path.name}: {e}")
 
-        # Сохраняем в JSON файл
+        # Save the compiled results into a JSON file
         try:
             with output_json_path.open("w", encoding="utf-8") as f:
                 json.dump(json_data, f, indent=2, ensure_ascii=False)
 
-            print(f"✅ Успешно обработано {processed_count} изображений")
-            print(f"💾 JSON файл сохранен: {output_json_path}")
+            logger.info(f"Successfully processed {processed_count} images")
+            logger.info(f"JSON file saved: {output_json_path}")
 
-            # Статистика
-            images_with_graffiti = 0
-            images_with_vandalism = 0
-
+            # Calculate and display basic dataset statistics
+            stats = {name: 0 for name in class_names}
             for item in json_data:
-                label_names = {
-                    ann["label_name"] for ann in item["annotations"]
-                }
-                if class_names[0] in label_names:
-                    images_with_graffiti += 1
-                if class_names[1] in label_names:
-                    images_with_vandalism += 1
+                labels = {ann["label_name"] for ann in item["annotations"]}
+                # Using class_names from config for stats mapping
+                for label in labels:
+                    if label in stats:
+                        stats[label] += 1
 
-            print(f"   Изображений с граффити: {images_with_graffiti}")
-            print(f"   Изображений с вандализмом: {images_with_vandalism}")
+            logger.info(
+                f"Statistics for {run_type}: "
+                f"Graffiti: {stats.get(class_names[0])}, "
+                f"Vandalism: {stats.get(class_names[1])}"
+            )
 
         except Exception as e:
-            print(f"❌ Ошибка при сохранении JSON файла: {e}")
+            logger.error(f"Failed to save JSON file: {e}")
 
 
 if __name__ == "__main__":
