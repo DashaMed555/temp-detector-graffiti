@@ -35,7 +35,7 @@ class DataCollator:
                 - orig_sizes (List[Tuple[int, int]]): Original image sizes
         """
         images = [b["image"] for b in batch]
-        text_prompts = [self.config.text_prompt] * len(images)
+        text_prompts = [self.config.fine_tuning.prompt] * len(images)
 
         enc = self.processor(
             images=images,
@@ -43,7 +43,7 @@ class DataCollator:
             return_tensors="pt",
             padding="max_length",
             truncation=True,
-            max_length=self.config.max_length,
+            max_length=self.config.model.max_length,
         )
 
         enc["model_inputs"] = {k: v for k, v in enc.items()}

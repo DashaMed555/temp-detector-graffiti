@@ -127,7 +127,7 @@ def main(config: DictConfig):
     )
     logger.info("Init TrainingArguments")
 
-    collate_fn = DataCollator(processor=processor, config=config.model)
+    collate_fn = DataCollator(processor=processor, config=config)
     logger.info("Init DataCollator")
 
     class MLflowCallback(TrainerCallback):
@@ -161,7 +161,7 @@ def main(config: DictConfig):
         eval_dataset=val_ds,
         data_collator=collate_fn,
         compute_metrics=compute_metrics,
-        config=config.model,
+        config=config.fine_tuning,
         processor=processor,
         callbacks=[MLflowCallback(mlflow_logger)],
     )

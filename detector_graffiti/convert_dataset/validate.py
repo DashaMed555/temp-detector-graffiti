@@ -81,9 +81,6 @@ def draw_bboxes_on_image(
     return img_rgb
 
 
-save_dir = None
-
-
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def validate_with_visualization(config: DictConfig):
     """

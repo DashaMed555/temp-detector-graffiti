@@ -29,16 +29,16 @@ class Inference:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.logger.info(f"Use device: {self.device}")
 
-        self.processor = AutoProcessor.from_pretrained(config.model_path)
-        self.logger.info(f"Load processor from: {config.model_path}")
+        self.processor = AutoProcessor.from_pretrained(config.model.model_id)
+        self.logger.info(f"Load processor from: {config.model.model_id}")
 
-        self.model = GDModel.from_pretrained(config.model_path)
-        self.logger.info(f"Load model from: {config.model_path}")
+        self.model = GDModel.from_pretrained(config.model.model_id)
+        self.logger.info(f"Load model from: {config.model.model_id}")
         self.model.to(self.device)
 
-        self.prompt = [config.prompt]
+        self.prompt = [config.inference.prompt]
         self.logger.info(f"Prompt: {self.prompt[0]}")
-        self.logger.info(f"Detection threshold: {config.threshold}")
+        self.logger.info(f"Detection threshold: {config.inference.threshold}")
 
     def run(self, frames, batch_size=1):
         """
@@ -78,7 +78,7 @@ class Inference:
         results = self.processor.post_process_grounded_object_detection(
             outputs,
             inputs.input_ids,
-            threshold=self.config.threshold,
+            threshold=self.config.inference.threshold,
             target_sizes=target_size * batch_size,
         )[0]
 
@@ -125,10 +125,10 @@ def main(config: DictConfig):
     logger.info("Start inference")
     logger.info(f"Output directory: {output_dir}")
 
-    inference = Inference(inf_config, logger)
+    inference = Inference(config, logger)
     logger.info("Init inference")
 
-    input_dir = Path(inf_config.images_path)
+    input_dir = Path(config.data_loading.test_image_path)
     logger.info(f"Input directory: {input_dir}")
 
     if not input_dir.exists():

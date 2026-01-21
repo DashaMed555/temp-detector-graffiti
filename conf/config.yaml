@@ -10,8 +10,10 @@ defaults:
 paths:
   train_json: "${data_loading.root}/train/annotations.json"
   val_json: "${data_loading.root}/valid/annotations.json"
+  test_json: "${data_loading.root}/test/annotations.json"
   train_images: "${data_loading.root}/train/images"
   val_images: "${data_loading.root}/valid/images"
+  test_images: "${data_loading.root}/test/images"
 
 params:
   class_names: ["graffiti", "vandalism"]
