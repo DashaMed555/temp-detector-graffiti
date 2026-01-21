@@ -1,13 +1,13 @@
-import os
 import random
 import shutil
+from pathlib import Path
 
 import fire
 from utils import image_extensions
 
 
 def split_dataset(
-    dataset_dir="dataset",
+    dataset_dir="datasets/dataset",
     train_ratio=0.6,
     val_ratio=0.2,
     test_ratio=0.2,
@@ -20,27 +20,24 @@ def split_dataset(
         images/
         labels/
     """
+    dataset_path = Path(dataset_dir)
 
     assert (
         abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-6
     ), "Сумма коэффициентов должна быть равна 1.0"
 
-    images_dir = os.path.join(dataset_dir, "images")
-    labels_dir = os.path.join(dataset_dir, "labels")
+    images_dir = dataset_path / "images"
+    labels_dir = dataset_path / "labels"
 
-    if not os.path.isdir(images_dir):
-        raise FileNotFoundError(
-            f"Не найдена папка с изображениями: {images_dir}"
-        )
-    if not os.path.isdir(labels_dir):
-        raise FileNotFoundError(
-            f"Не найдена папка с аннотациями: {labels_dir}"
-        )
+    if not images_dir.is_dir():
+        raise FileNotFoundError(f"Не найдена папка с изображениями: {images_dir}")
+    if not labels_dir.is_dir():
+        raise FileNotFoundError(f"Не найдена папка с аннотациями: {labels_dir}")
 
     image_files = [
-        f
-        for f in os.listdir(images_dir)
-        if f.lower().endswith(image_extensions)
+        f.name
+        for f in images_dir.iterdir()
+        if f.suffix.lower() in image_extensions
     ]
 
     if not image_files:
@@ -61,28 +58,31 @@ def split_dataset(
     }
 
     for split, files in splits.items():
-        split_dir = os.path.join(dataset_dir, split)
-        if os.path.exists(split_dir):
+        split_dir = dataset_path / split
+        
+        if split_dir.exists():
             shutil.rmtree(split_dir)
-        img_out = os.path.join(split_dir, "images")
-        lbl_out = os.path.join(split_dir, "labels")
-        os.makedirs(img_out, exist_ok=True)
-        os.makedirs(lbl_out, exist_ok=True)
+        
+        img_out = split_dir / "images"
+        lbl_out = split_dir / "labels"
+
+        img_out.mkdir(parents=True, exist_ok=True)
+        lbl_out.mkdir(parents=True, exist_ok=True)
 
         for img_name in files:
-            src_img = os.path.join(images_dir, img_name)
-            dst_img = os.path.join(img_out, img_name)
+            src_img = images_dir / img_name
+            dst_img = img_out / img_name
             shutil.copy2(src_img, dst_img)
 
-            label_name = os.path.splitext(img_name)[0] + ".txt"
-            src_lbl = os.path.join(labels_dir, label_name)
-            dst_lbl = os.path.join(lbl_out, label_name)
+            label_name = Path(img_name).with_suffix(".txt").name
+            src_lbl = labels_dir / label_name
+            dst_lbl = lbl_out / label_name
 
-            # Если аннотации нет — создаём пустой файл
-            if os.path.exists(src_lbl):
+            if src_lbl.exists():
                 shutil.copy2(src_lbl, dst_lbl)
             else:
-                open(dst_lbl, "w").close()
+                # Если аннотации нет — создаём пустой файл
+                dst_lbl.touch()
 
     print("✅ Датасет успешно разделён:")
     for k, v in splits.items():
