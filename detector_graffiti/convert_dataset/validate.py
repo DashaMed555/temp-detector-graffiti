@@ -80,7 +80,7 @@ def draw_bboxes_on_image(
 
 
 def validate_with_visualization(
-    dataset_dir="dataset", run_type="train", num_samples=5, save_dir=None
+    dataset_dir="datasets/dataset", run_type="train", num_samples=5, save_dir=None
 ):
     """
     Визуальная проверка аннотаций с отрисовкой bounding boxes.
