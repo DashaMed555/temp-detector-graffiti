@@ -206,13 +206,13 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# dataset
-/dataset.zip
+# datasets
 dataset
-difficult_dataset.zip
 difficult_dataset
 normal_dataset
-normal_dataset.zip
+data/Graffiti Detection.v1i.yolov11
+data/17k_Graffiti.v1i.yolov11
+data/train.v13i.yolov11
 
 #outputs
 /outputs
