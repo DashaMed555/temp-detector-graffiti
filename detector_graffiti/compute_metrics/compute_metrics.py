@@ -3,6 +3,19 @@ import torch
 
 
 def compute_iou(pred_boxes, target_boxes):
+    """
+    Compute Intersection over Union (IoU) between two sets of bounding boxes.
+
+    Args:
+        pred_boxes (Tensor): Predicted boxes in (x1, y1, x2, y2)
+        format, shape (N, 4)
+        target_boxes (Tensor): Ground truth boxes in (x1, y1, x2, y2)
+        format, shape (M, 4)
+
+    Returns:
+        Tensor: IoU matrix of shape (N, M) where element (i,j) is IoU between
+                pred_boxes[i] and target_boxes[j]
+    """
     area1 = (pred_boxes[:, 2] - pred_boxes[:, 0]) * (
         pred_boxes[:, 3] - pred_boxes[:, 1]
     )
@@ -24,6 +37,17 @@ def compute_iou(pred_boxes, target_boxes):
 
 
 def match_predictions_to_targets(pred_boxes, target_boxes, iou_threshold=0.5):
+    """
+    Match predictions to ground truth boxes using greedy IoU matching.
+
+    Args:
+        pred_boxes (Tensor): Predicted boxes, shape (N, 4)
+        target_boxes (Tensor): Ground truth boxes, shape (M, 4)
+        iou_threshold (float): Minimum IoU for a match
+
+    Returns:
+        int: Number of correctly matched predictions (true positives)
+    """
     if len(pred_boxes) == 0 or len(target_boxes) == 0:
         return 0
 
@@ -44,6 +68,26 @@ def match_predictions_to_targets(pred_boxes, target_boxes, iou_threshold=0.5):
 
 
 def compute_metrics(eval_preds, device=None, iou_threshold=0.5):
+    """
+    Compute object detection metrics from evaluation predictions.
+
+    Args:
+        eval_preds (Tuple[Tensor, Tuple[List[Tensor], List[Tensor]]]):
+            Tuple containing:
+                - count_boxes (Tensor): Tensor with box counts for each image
+                - (preds_batch, labels_batch): Lists of predicted and
+                  ground truth boxes
+        device (Optional[torch.device]): Device for computation
+        iou_threshold (float): IoU threshold for correct detection
+
+    Returns:
+        Dict[str, float]: Dictionary containing:
+            - precision (float): Precision metric
+            - recall (float): Recall metric
+            - f1 (float): F1 score
+            - false positive percentage (float): Percentage of images
+              with false positives
+    """
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

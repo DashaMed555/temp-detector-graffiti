@@ -1,3 +1,7 @@
+import datetime
+import logging
+from pathlib import Path
+
 import hydra
 import torch
 from omegaconf import DictConfig
@@ -7,7 +11,38 @@ from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
+    """
+    Convert a fine-tuned Grounding DINO model to ONNX format
+    for optimized inference.
+
+    Args:
+        config (DictConfig): Configuration object containing ONNX
+        conversion parameters
+    """
+
     conf_oc = config.onnx_converter
+
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    output_dir = Path(conf_oc.output_dir) / current_time
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    logger = logging.getLogger(__name__)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(
+                str(output_dir / "inference.log"), encoding="utf-8"
+            ),
+            logging.StreamHandler(),
+        ],
+        force=True,
+    )
+
+    logger.info("Start onnx converter")
+    logger.info(f"Output directory: {output_dir}")
 
     model = AutoModelForZeroShotObjectDetection.from_pretrained(
         conf_oc.ft_model_id,
@@ -15,11 +50,17 @@ def main(config: DictConfig):
         output_attentions=True,
         output_hidden_states=True,
     )
+    logger.info(f"Load model from: {conf_oc.ft_model_id}")
+
     processor = AutoProcessor.from_pretrained(conf_oc.ft_model_id)
+    logger.info(f"Load processor from: {conf_oc.ft_model_id}")
 
     image = Image.open(conf_oc.image_path).convert("RGB")
+    logger.info(f"Load image from: {conf_oc.image_path}")
     image = image.resize(conf_oc.image_size)
+    logger.info(f"Resize image to: {conf_oc.image_size}")
 
+    logger.info("Preparing model inputs")
     inputs = processor(
         images=image,
         text=conf_oc.prompt,
@@ -40,10 +81,14 @@ def main(config: DictConfig):
         dtype=torch.int64,
     )
 
+    otput_path = output_dir / "grounding_dino.onnx"
+
+    logger.info(f"Export model to ONNX format: {otput_path}")
+
     torch.onnx.export(
         model,
         (pixel_values, input_ids, token_type_ids, attention_mask, pixel_mask),
-        "grounding_dino.onnx",
+        str(otput_path),
         input_names=[
             "pixel_values",
             "input_ids",
@@ -64,6 +109,7 @@ def main(config: DictConfig):
         opset_version=19,
         do_constant_folding=True,
     )
+    logger.info("ONNX export completed successfully")
 
 
 if __name__ == "__main__":

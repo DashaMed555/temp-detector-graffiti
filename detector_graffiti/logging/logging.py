@@ -6,6 +6,14 @@ import mlflow
 
 
 class MLflowLogger:
+    """
+    Logger for tracking experiments and metrics with MLflow.
+
+    Args:
+        config (DictConfig): Configuration object containing logging parameters
+        output_dir (str): Directory for saving plots
+    """
+
     def __init__(self, config, output_dir):
         self.config = config
         self.git_commit = subprocess.check_output(
@@ -28,6 +36,12 @@ class MLflowLogger:
         self.plots_dir.mkdir(exist_ok=True)
 
     def start_run(self, run_name):
+        """
+        Start a new MLflow run.
+
+        Args:
+            run_name (str): Name for the MLflow run
+        """
         self.run = mlflow.start_run(run_name=run_name)
         mlflow.log_param("git_commit", self.git_commit)
         for key, value in self.config.fine_tuning.items():
@@ -35,6 +49,12 @@ class MLflowLogger:
                 mlflow.log_param(key, value)
 
     def log_metrics(self, logs):
+        """
+        Log metrics to MLflow and update metric history.
+
+        Args:
+            logs (Dict[str, Any]): Dictionary containing metric values
+        """
         metrics_to_log = {}
         for key in self.metrics:
             if key in logs:
@@ -51,6 +71,9 @@ class MLflowLogger:
                     mlflow.log_metric(key, value, step=int(logs["epoch"]))
 
     def save_plots(self):
+        """
+        Save plots of training metrics.
+        """
         self._create_plots(
             ["loss", "eval_loss"],
             "loss_plot.png",
@@ -66,6 +89,14 @@ class MLflowLogger:
         )
 
     def _create_plots(self, metric_names, filename, title):
+        """
+        Create a plot for specified metrics and save it.
+
+        Args:
+            metric_names (List[str]): Names of metrics to plot
+            filename (str): Name for the saved plot file
+            title (str): Title for the plot
+        """
         plt.figure(figsize=(8, 5))
 
         for metric in metric_names:
@@ -87,5 +118,8 @@ class MLflowLogger:
         mlflow.log_artifact(str(self.plots_dir / filename))
 
     def end_run(self):
+        """
+        End the current MLflow run and save all artifacts.
+        """
         self.save_plots()
         mlflow.end_run()

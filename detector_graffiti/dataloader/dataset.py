@@ -7,6 +7,16 @@ from torch.utils.data import Dataset
 
 
 class JsonDataset(Dataset):
+    """
+    Dataset for loading images and annotations from JSON format
+      for object detection.
+
+    Args:
+        json_path (str): Path to JSON file containing image annotations
+        image_path (str): Directory path containing images
+        label2id (Dict[str, int]): Mapping from class names to integer IDs
+    """
+
     def __init__(self, json_path, image_path, label2id):
         with open(json_path, "r") as f:
             data = json.load(f)
@@ -43,9 +53,31 @@ class JsonDataset(Dataset):
             )
 
     def __len__(self):
+        """
+        Get the number of items in the dataset.
+
+        Returns:
+            int: Number of images in the dataset
+        """
         return len(self.items)
 
     def __getitem__(self, idx):
+        """
+        Get a single item from the dataset.
+
+        Args:
+            idx (int): Index of the item to retrieve
+
+        Returns:
+            Dict[str, Any]: Dictionary containing:
+                - image (Image): PIL Image object in RGB format
+                - image_path (str): Path to the image file
+                - size (Tuple[int, int]): (height, width) of the image
+                - boxes (torch.Tensor): Bounding boxes in (cx, cy, w, h)
+                  format, shape (N, 4)
+                - class_labels (torch.Tensor): Class IDs for each box,
+                  shape (N,)
+        """
         it = self.items[idx]
         image = Image.open(it["image_path"]).convert("RGB")
         return {"image": image, **it}

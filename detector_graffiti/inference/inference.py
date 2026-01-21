@@ -14,6 +14,14 @@ from transformers import AutoProcessor
 
 
 class Inference:
+    """
+    Inference engine for Grounding DINO zero-shot object detection.
+
+    Args:
+            config (DictConfig): Inference configuration parameters
+            logger (logging.Logger): Logger for tracking inference process
+    """
+
     def __init__(self, config, logger):
         self.config = config
         self.logger = logger
@@ -33,6 +41,21 @@ class Inference:
         self.logger.info(f"Detection threshold: {config.threshold}")
 
     def run(self, frames, batch_size=1):
+        """
+        Run object detection inference on input frames.
+
+        Args:
+            frames (np.ndarray): Input image array in RGB format,
+            shape (H, W, 3)
+            batch_size (int): Batch size for processing (currently supports 1)
+
+        Returns:
+            List[Dict[str, Any]]: List of detection dictionaries,
+            each containing:
+                - box (np.ndarray): Bounding box coordinates [x1, y1, x2, y2]
+                - class (str): Detected class label
+                - confidence (float): Detection confidence score
+        """
         target_size = [frames.shape[:2]]
         prompt = self.prompt * batch_size
         inputs = self.processor(
@@ -72,6 +95,13 @@ class Inference:
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
+    """
+    Main inference function for detecting graffiti in images.
+
+    Args:
+        config (DictConfig): Hydra configuration object containing
+        inference parameters
+    """
     inf_config = config.inference
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")

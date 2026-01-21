@@ -1,3 +1,4 @@
+output_dir: "runs/onnx"
 ft_model_id: "../grounding_dino_ft"
 image_path: "../002350.png"
 image_size: (800, 800)

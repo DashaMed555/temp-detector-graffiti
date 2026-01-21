@@ -4,12 +4,32 @@ from transformers import Trainer
 
 
 class GroundingDINOTrainer(Trainer):
+    """
+    Custom trainer for Grounding DINO model with specialized loss computation
+    and prediction handling for object detection tasks.
+
+    Args:
+        config (DictConfig): Model configuration parameters
+        processor: Text and image processor for Grounding DINO
+        **kwargs: Additional arguments passed to base Trainer class
+    """
+
     def __init__(self, config: DictConfig = None, processor=None, **kwargs):
         super().__init__(**kwargs)
         self.processor = processor
         self.config = config
 
     def _build_model_inputs(self, batch, device):
+        """
+        Prepare model inputs from batch.
+
+        Args:
+            batch (Dict[str, Any]): Batch data with inputs and labels
+            device (torch.device): Target device for tensors
+
+        Returns:
+            Dict[str, Any]: Model inputs ready for forward pass
+        """
         if "model_inputs" in batch:
             model_inputs = {
                 k: v.to(device) for k, v in batch["model_inputs"].items()
@@ -50,6 +70,18 @@ class GroundingDINOTrainer(Trainer):
     def compute_loss(
         self, model, inputs, return_outputs=False, *args, **kwargs
     ):
+        """
+        Compute loss for batch.
+
+        Args:
+            model (torch.nn.Module): Grounding DINO model
+            inputs (Dict[str, Any]): Batch data
+            return_outputs (bool): Return model outputs with loss
+
+        Returns:
+            Union[torch.Tensor, Tuple[torch.Tensor, Dict[str, Any]]]:
+                Loss tensor or (loss, outputs) tuple
+        """
         device = model.device
         model_inputs = self._build_model_inputs(inputs, device)
         outputs = model(**model_inputs)
@@ -59,6 +91,27 @@ class GroundingDINOTrainer(Trainer):
     def prediction_step(
         self, model, inputs, prediction_loss_only=False, ignore_keys=None
     ):
+        """
+        Run prediction and format outputs for metrics.
+
+        Args:
+            model (torch.nn.Module): Grounding DINO model
+            inputs (Dict[str, Any]): Batch data
+            prediction_loss_only (bool): Only return loss
+            ignore_keys (Optional[List[str]]): Keys to ignore
+
+        Returns:
+            Tuple[torch.Tensor, Optional[torch.Tensor],
+            Optional[Tuple[List[torch.Tensor], List[torch.Tensor]]]]:
+                (loss, count_boxes, (pred_boxes, gt_boxes))
+                - loss (torch.Tensor): scalar tensor
+                - count_boxes (Optional[torch.Tensor]):
+                tensor with [pred_count, gt_count]
+                - pred_boxes (List[torch.Tensor]):
+                list of predicted boxes per image
+                - gt_boxes (List[torch.Tensor]):
+                list of ground truth boxes per image
+        """
         model.eval()
         device = model.device
 
