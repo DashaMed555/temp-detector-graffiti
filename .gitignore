@@ -208,7 +208,13 @@ __marimo__/
 
 # dataset
 /dataset.zip
+dataset
 
 #outputs
 /outputs
 /runs
+
+#mlflow
+mlflow.db
+
+mlartifacts
