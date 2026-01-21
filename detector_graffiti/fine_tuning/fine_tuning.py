@@ -7,6 +7,7 @@ from omegaconf import DictConfig
 from transformers import (
     AutoProcessor,
     GroundingDinoForObjectDetection,
+    TrainerCallback,
     TrainingArguments,
     set_seed,
 )
@@ -16,6 +17,7 @@ from ..dataloader.dataset import JsonDataset
 from ..dataloader.utils import DataCollator
 from ..freeze_layers.freeze_layers import freeze_layers
 from ..grounding_dino_trainer.trainer import GroundingDINOTrainer
+from ..logging.logging import MLflowLogger
 
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
@@ -25,6 +27,9 @@ def main(config: DictConfig):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     set_seed(config.fine_tuning.seed)
+
+    mlflow_logger = MLflowLogger(config, str(output_dir))
+    mlflow_logger.start_run(run_name=f"train_{current_time}")
 
     with open(config.data_loading.train_json_path, "r") as f:
         train_data = json.load(f)
@@ -87,6 +92,19 @@ def main(config: DictConfig):
 
     collate_fn = DataCollator(processor=processor, config=config.model)
 
+    class MLflowCallback(TrainerCallback):
+        def __init__(self, logger):
+            self.logger = logger
+
+        def on_log(self, args, state, control, logs=None, **kwargs):
+            if logs:
+                self.logger.log_metrics(
+                    logs, step=logs.get("step") if logs else None
+                )
+
+    callbacks_list = []
+    callbacks_list.append(MLflowCallback(mlflow_logger))
+
     trainer = GroundingDINOTrainer(
         model=model,
         args=args,
@@ -96,9 +114,13 @@ def main(config: DictConfig):
         compute_metrics=compute_metrics,
         config=config.model,
         processor=processor,
+        callbacks=callbacks_list,
     )
 
     trainer.train()
+
+    mlflow_logger.end_run()
+
     model_path = output_dir / "ft_model"
     model.save_pretrained(model_path)
     processor.save_pretrained(model_path)
