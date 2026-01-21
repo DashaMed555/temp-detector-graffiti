@@ -1,6 +1,6 @@
 import json
-import os
 import random
+from pathlib import Path
 
 import cv2
 import fire
@@ -15,9 +15,10 @@ def draw_bboxes_on_image(
     """
     Рисует bounding boxes на изображении
     """
+    image_path = Path(image_path)
     colors = {class_names[0]: (255, 0, 0), class_names[1]: (0, 0, 255)}
 
-    img = cv2.imread(image_path)
+    img = cv2.imread(str(image_path))
     if img is None:
         print(f"❌ Не удалось прочитать изображение: {image_path}")
         return
@@ -57,8 +58,9 @@ def draw_bboxes_on_image(
         )
 
     if output_path:
+        output_path = Path(output_path)
         img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(output_path, img_bgr)
+        cv2.imwrite(str(output_path), img_bgr)
         print(f"💾 Изображение с bbox сохранено: {output_path}")
 
     if show_image:
@@ -66,7 +68,7 @@ def draw_bboxes_on_image(
         plt.imshow(img_rgb)
         plt.title(
             (
-                f"Image: {os.path.basename(image_path)}\n"
+                f"Image: {image_path.name}\n"
                 f"BBoxes: {len(annotations)}"
             )
         )
@@ -89,14 +91,16 @@ def validate_with_visualization(
         num_samples (int): Количество случайных изображений для проверки.
         save_dir (str, optional): Папка для сохранения результатов.
     """
-    json_path = os.path.join(dataset_dir, run_type, "annotations.json")
-    images_dir = os.path.join(dataset_dir, run_type, "images")
+    dataset_path = Path(dataset_dir)
+    json_path = dataset_path / run_type / "annotations.json"
+    images_dir = dataset_path / run_type / "images"
 
     if save_dir:
-        os.makedirs(save_dir, exist_ok=True)
+        save_dir = Path(save_dir)
+        save_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        if not os.path.exists(json_path):
+        if not json_path.exists():
             print(f"❌ Файл аннотаций не найден: {json_path}")
             return
 
@@ -113,7 +117,7 @@ def validate_with_visualization(
 
         for i, item in enumerate(samples_to_check):
             image_name = item["image_name"]
-            image_path = os.path.join(images_dir, image_name)
+            image_path = images_dir / image_name
             annotations = item["annotations"]
 
             print(f"\n📋 Пример {i+1}/{len(samples_to_check)}:")
@@ -121,16 +125,14 @@ def validate_with_visualization(
             print(f"   Размер: {item['width']}x{item['height']}")
             print(f"   Аннотаций: {len(annotations)}")
 
-            if not os.path.exists(image_path):
+            if not image_path.exists():
                 print(f"❌ Изображение не найдено: {image_path}")
                 continue
 
             output_path = None
             if save_dir:
-                output_name = (
-                    f"visualization_{os.path.splitext(image_name)[0]}.png"
-                )
-                output_path = os.path.join(save_dir, output_name)
+                output_name = f"visualization_{Path(image_name).stem}.png"
+                output_path = save_dir / output_name
 
             if annotations:
                 print("   Координаты первой аннотации (нормализованные):")
