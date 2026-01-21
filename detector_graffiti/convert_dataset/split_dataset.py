@@ -30,9 +30,13 @@ def split_dataset(
     labels_dir = dataset_path / "labels"
 
     if not images_dir.is_dir():
-        raise FileNotFoundError(f"Не найдена папка с изображениями: {images_dir}")
+        raise FileNotFoundError(
+            f"Не найдена папка с изображениями: {images_dir}"
+        )
     if not labels_dir.is_dir():
-        raise FileNotFoundError(f"Не найдена папка с аннотациями: {labels_dir}")
+        raise FileNotFoundError(
+            f"Не найдена папка с аннотациями: {labels_dir}"
+        )
 
     image_files = [
         f.name
@@ -59,10 +63,10 @@ def split_dataset(
 
     for split, files in splits.items():
         split_dir = dataset_path / split
-        
+
         if split_dir.exists():
             shutil.rmtree(split_dir)
-        
+
         img_out = split_dir / "images"
         lbl_out = split_dir / "labels"
 

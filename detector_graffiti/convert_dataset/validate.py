@@ -67,10 +67,7 @@ def draw_bboxes_on_image(
         plt.figure(figsize=(12, 8))
         plt.imshow(img_rgb)
         plt.title(
-            (
-                f"Image: {image_path.name}\n"
-                f"BBoxes: {len(annotations)}"
-            )
+            (f"Image: {image_path.name}\n" f"BBoxes: {len(annotations)}")
         )
         plt.axis("off")
         plt.tight_layout()
@@ -80,7 +77,10 @@ def draw_bboxes_on_image(
 
 
 def validate_with_visualization(
-    dataset_dir="datasets/dataset", run_type="train", num_samples=5, save_dir=None
+    dataset_dir="datasets/dataset",
+    run_type="train",
+    num_samples=5,
+    save_dir=None,
 ):
     """
     Визуальная проверка аннотаций с отрисовкой bounding boxes.

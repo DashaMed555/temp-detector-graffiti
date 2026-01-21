@@ -56,8 +56,9 @@ poetry run dvc remote modify gdrive --local gdrive_client_secret "<CLIENT_SECRET
 
 5. Загрузка датасетов:
 
-При первом выполнении команды ниже нужно будет пройти авторизацию технического аккаунта google. 
+При первом выполнении команды ниже нужно будет пройти авторизацию технического аккаунта google.
 Для получения логина и пароля пишите d.medvdeveda@g.nsu.ru.
+
 ```
 poetry run dvc pull
 ```

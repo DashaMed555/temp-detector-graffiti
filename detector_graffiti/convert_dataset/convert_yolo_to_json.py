@@ -30,7 +30,8 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
 
         # Получаем список изображений
         image_files = [
-            f for f in images_directory.iterdir() 
+            f
+            for f in images_directory.iterdir()
             if f.suffix.lower() in image_extensions
         ]
 
@@ -43,7 +44,9 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
             try:
                 width, height = get_image_dimensions(image_path)
 
-                annotation_path = labels_directory / image_path.with_suffix('.txt').name
+                annotation_path = (
+                    labels_directory / image_path.with_suffix(".txt").name
+                )
 
                 annotations = parse_yolo_annotation(annotation_path)
 
@@ -61,7 +64,9 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
                     print(f"📊 Обработано {processed_count} изображений...")
 
             except Exception as e:
-                print(f"❌ Ошибка при обработке изображения {image_path.name}: {e}")
+                print(
+                    f"Ошибка при обработке изображения {image_path.name}: {e}"
+                )
 
         # Сохраняем в JSON файл
         try:

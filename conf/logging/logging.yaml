@@ -1,3 +1,3 @@
-tracking_uri: "http://127.0.0.1:8080"
+tracking_uri: "http://127.0.0.1:8888"
 experiment_name: "graffiti-detector"
 plots_dir: "plots"

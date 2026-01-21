@@ -1,6 +1,6 @@
-from pathlib import Path
 import random
 import shutil
+from pathlib import Path
 
 import fire
 import yaml
@@ -113,7 +113,9 @@ def process_datasets(
     num_to_select = max(1, int(len(items) * percentage))
     items = random.sample(items, num_to_select)
 
-    print(f"📦 Кандидатов изображений после фильтрации по проценту: {len(items)}")
+    print(
+        f"📦 Кандидатов изображений после фильтрации по проценту: {len(items)}"
+    )
 
     # ---------- Балансировка по bbox ----------
     if balance_classes:
