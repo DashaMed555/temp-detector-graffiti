@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 from pathlib import Path
 
 import hydra
@@ -26,10 +27,30 @@ def main(config: DictConfig):
     output_dir = Path(config.fine_tuning.output_dir) / current_time
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    logger = logging.getLogger(__name__)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(
+                str(output_dir / "inference.log"), encoding="utf-8"
+            ),
+            logging.StreamHandler(),
+        ],
+        force=True,
+    )
+
+    logger.info("Start fine-tuning")
+    logger.info(f"Output directory: {output_dir}")
+
     set_seed(config.fine_tuning.seed)
+    logger.info(f"Set seed: {config.fine_tuning.seed}")
 
     mlflow_logger = MLflowLogger(config, str(output_dir))
     mlflow_logger.start_run(run_name=f"train_{current_time}")
+    logger.info("Run start MLflow")
 
     with open(config.data_loading.train_json_path, "r") as f:
         train_data = json.load(f)
@@ -45,13 +66,21 @@ def main(config: DictConfig):
         config.data_loading.train_image_path,
         label2id,
     )
+    logger.info("Load train data")
+    logger.info(f"Images path: {config.data_loading.train_image_path}")
+    logger.info(f"Labels path: {config.data_loading.train_json_path}")
+
     val_ds = JsonDataset(
         config.data_loading.val_json_path,
         config.data_loading.val_image_path,
         label2id,
     )
+    logger.info("Load validation data")
+    logger.info(f"Images path: {config.data_loading.val_image_path}")
+    logger.info(f"Labels path: {config.data_loading.val_json_path}")
 
     processor = AutoProcessor.from_pretrained(config.model.model_id)
+    logger.info(f"Load processor from: {config.model.model_id}")
 
     model = GroundingDinoForObjectDetection.from_pretrained(
         config.model.model_id,
@@ -59,6 +88,7 @@ def main(config: DictConfig):
         label2id=label2id,
         ignore_mismatched_sizes=True,
     )
+    logger.info(f"Load model from: {config.model.model_id}")
 
     if config.freeze_layers.freeze_layers:
         freeze_layers(model, config.freeze_layers)
@@ -80,16 +110,18 @@ def main(config: DictConfig):
         adam_beta2=config_ft.adam_beta2,
         optim=config_ft.optim,
         save_strategy=config_ft.save_strategy,
-        report_to="none",
         load_best_model_at_end=config_ft.load_best_model_at_end,
         dataloader_pin_memory=config_ft.dataloader_pin_memory,
-        logging_strategy=config_ft.logging_strategy,
         metric_for_best_model=config_ft.metric_for_best_model,
         greater_is_better=config_ft.greater_is_better,
         lr_scheduler_type=config_ft.lr_scheduler_type,
+        logging_strategy=config_ft.logging_strategy,
+        report_to=config_ft.report_to,
     )
+    logger.info("Init TrainingArguments")
 
     collate_fn = DataCollator(processor=processor, config=config.model)
+    logger.info("Init DataCollator")
 
     class MLflowCallback(TrainerCallback):
         def __init__(self, logger):
@@ -98,9 +130,6 @@ def main(config: DictConfig):
         def on_log(self, args, state, control, logs=None, **kwargs):
             if logs:
                 self.logger.log_metrics(logs)
-
-    callbacks_list = []
-    callbacks_list.append(MLflowCallback(mlflow_logger))
 
     trainer = GroundingDINOTrainer(
         model=model,
@@ -111,16 +140,24 @@ def main(config: DictConfig):
         compute_metrics=compute_metrics,
         config=config.model,
         processor=processor,
-        callbacks=callbacks_list,
+        callbacks=[MLflowCallback(mlflow_logger)],
     )
 
+    logger.info("Init trainer")
+
+    logger.info("Start train")
     trainer.train()
+    logger.info("End train")
 
     mlflow_logger.end_run()
+    logger.info("Run end MLflow")
 
     model_path = output_dir / "ft_model"
     model.save_pretrained(model_path)
+    logger.info("Save fine-tuned model")
+
     processor.save_pretrained(model_path)
+    logger.info("Save processor")
 
 
 if __name__ == "__main__":

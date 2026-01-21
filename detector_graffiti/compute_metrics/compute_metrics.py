@@ -19,11 +19,14 @@ def compute_iou(pred_boxes, target_boxes):
     inter = wh[:, :, 0] * wh[:, :, 1]  # (N_pred, N_gt)
 
     union = area1[:, None] + area2 - inter
-    iou = inter / union
+    iou = inter / (union + 1e-8)
     return iou
 
 
 def match_predictions_to_targets(pred_boxes, target_boxes, iou_threshold=0.5):
+    if len(pred_boxes) == 0 or len(target_boxes) == 0:
+        return 0
+
     ious = compute_iou(pred_boxes, target_boxes)
     matched_gt = set()
     correct = 0

@@ -1,4 +1,11 @@
+import logging
+
+
 def freeze_layers(model, config):
+    logger = logging.getLogger(__name__)
+
+    logger.info("Start parameters freeze")
+
     base_model = model.model
 
     for param in base_model.parameters():
@@ -24,10 +31,8 @@ def freeze_layers(model, config):
     trainable = sum(
         p.numel() for p in base_model.parameters() if p.requires_grad
     )
-    print(
-        (
-            "Заморозка завершена. Обучаемых параметров: ",
-            f"{trainable:,} / {total:,} ",
-        ),
-        f"({100 * trainable / total:.2f}%)",
-    )
+
+    p = 100 * trainable / total
+
+    logger.info("Freeze is complete.")
+    logger.info(f"Trainable parameters: {trainable:,} / {total:,} ({p:.2f}%)")
