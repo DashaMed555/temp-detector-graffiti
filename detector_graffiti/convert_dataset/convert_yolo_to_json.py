@@ -41,11 +41,11 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
 
         for image_path in sorted(image_files):
             try:
-                width, height = get_image_dimensions(str(image_path))
+                width, height = get_image_dimensions(image_path)
 
                 annotation_path = labels_directory / image_path.with_suffix('.txt').name
 
-                annotations = parse_yolo_annotation(str(annotation_path))
+                annotations = parse_yolo_annotation(annotation_path)
 
                 image_data = {
                     "image_name": image_path.name,
