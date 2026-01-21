@@ -30,13 +30,19 @@ git clone git@github.com:DashaMed555/temp-detector-graffiti.git
 git clone https://github.com/DashaMed555/temp-detector-graffiti.git
 ```
 
-2. Создание виртуального окружения и установка необходимых библиотек:
+2. Переход в корень проекта:
+
+```
+cd detector-graffiti
+```
+
+3. Создание виртуального окружения и установка необходимых библиотек:
 
 ```
 poetry install
 ```
 
-3. Настройка DVC:
+4. Настройка DVC:
 
 <CLIENT_ID> и <CLIENT_SECRET> можно получить, написав d.medvdeveda@g.nsu.ru.
 
@@ -48,8 +54,10 @@ poetry run dvc remote modify gdrive --local gdrive_client_id "<CLIENT_ID>"
 poetry run dvc remote modify gdrive --local gdrive_client_secret "<CLIENT_SECRET>"
 ```
 
-4. Загрузка датасетов:
+5. Загрузка датасетов:
 
+При первом выполнении команды ниже нужно будет пройти авторизацию технического аккаунта google. 
+Для получения логина и пароля пишите d.medvdeveda@g.nsu.ru.
 ```
 poetry run dvc pull
 ```
