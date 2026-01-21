@@ -2,17 +2,14 @@ import random
 import shutil
 from pathlib import Path
 
-import fire
+import hydra
+from hydra.utils import get_original_cwd
+from omegaconf import DictConfig
 from utils import image_extensions
 
 
-def split_dataset(
-    dataset_dir="datasets/dataset",
-    train_ratio=0.6,
-    val_ratio=0.2,
-    test_ratio=0.2,
-    seed=42,
-):
+@hydra.main(version_base=None, config_path="../../conf", config_name="config")
+def split_dataset(config: DictConfig):
     """
     Делит датасет на train / val / test.
     Ожидается структура:
@@ -20,7 +17,12 @@ def split_dataset(
         images/
         labels/
     """
-    dataset_path = Path(dataset_dir)
+    project_root = Path(get_original_cwd())
+    dataset_path = project_root / config.data_loading.root
+
+    train_ratio = config.data_splitting.train_ratio
+    val_ratio = config.data_splitting.val_ratio
+    test_ratio = config.data_splitting.test_ratio
 
     assert (
         abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-6
@@ -30,9 +32,13 @@ def split_dataset(
     labels_dir = dataset_path / "labels"
 
     if not images_dir.is_dir():
-        raise FileNotFoundError(f"Не найдена папка с изображениями: {images_dir}")
+        raise FileNotFoundError(
+            f"Не найдена папка с изображениями: {images_dir}"
+        )
     if not labels_dir.is_dir():
-        raise FileNotFoundError(f"Не найдена папка с аннотациями: {labels_dir}")
+        raise FileNotFoundError(
+            f"Не найдена папка с аннотациями: {labels_dir}"
+        )
 
     image_files = [
         f.name
@@ -43,7 +49,7 @@ def split_dataset(
     if not image_files:
         raise RuntimeError("В папке images нет изображений")
 
-    random.seed(seed)
+    random.seed(config.data_splitting.seed)
     random.shuffle(image_files)
 
     total = len(image_files)
@@ -59,10 +65,10 @@ def split_dataset(
 
     for split, files in splits.items():
         split_dir = dataset_path / split
-        
+
         if split_dir.exists():
             shutil.rmtree(split_dir)
-        
+
         img_out = split_dir / "images"
         lbl_out = split_dir / "labels"
 
@@ -90,4 +96,4 @@ def split_dataset(
 
 
 if __name__ == "__main__":
-    fire.Fire(split_dataset)
+    split_dataset()

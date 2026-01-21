@@ -1,20 +1,24 @@
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
-import fire
 from PIL import Image
 
 image_extensions = (".png", ".jpg", ".jpeg", ".bmp", ".tiff")
-class_names = ["graffiti", "vandalism"]
 
 
-def parse_yolo_annotation(annotation_path: Union[str, Path]):
+def parse_yolo_annotation(
+    annotation_path: Union[str, Path], class_names: List[str] = None
+):
     """
-    Парсит YOLO аннотацию и возвращает список bbox'ов.
+    Парсит YOLO аннотацию.
 
     Args:
-        annotation_path (str | Path): Путь к текстовому файлу аннотации.
+        annotation_path: Путь к файлу.
+        class_names: Список имен классов. Если None, используются дефолтные.
     """
+    if class_names is None:
+        class_names = ["graffiti", "vandalism"]
+
     annotations = []
     path = Path(annotation_path)
 
@@ -27,27 +31,30 @@ def parse_yolo_annotation(annotation_path: Union[str, Path]):
 
         for line in lines:
             line = line.strip()
-            if line:
-                parts = line.split()
-                if len(parts) >= 5:
-                    class_id = int(parts[0])
-                    cx, cy, w, h = map(float, parts[1:5])
+            if not line:
+                continue
 
-                    if class_id not in (0, 1):
-                        continue
+            parts = line.split()
+            if len(parts) >= 5:
+                class_id = int(parts[0])
 
-                    if w <= 0 or h <= 0:
-                        continue
+                if class_id < 0 or class_id >= len(class_names):
+                    continue
 
-                    annotations.append(
-                        {
-                            "label_name": class_names[class_id],
-                            "cx": cx,
-                            "cy": cy,
-                            "w": w,
-                            "h": h,
-                        }
-                    )
+                cx, cy, w, h = map(float, parts[1:5])
+
+                if w <= 0 or h <= 0:
+                    continue
+
+                annotations.append(
+                    {
+                        "label_name": class_names[class_id],
+                        "cx": cx,
+                        "cy": cy,
+                        "w": w,
+                        "h": h,
+                    }
+                )
 
     except Exception as e:
         print(f"❌ Ошибка при чтении файла {path}: {e}")
@@ -69,7 +76,3 @@ def get_image_dimensions(image_path: Union[str, Path]):
     except Exception as e:
         print(f"⚠️ Не удалось определить размер {path}: {e}")
         return 640, 480
-
-
-if __name__ == "__main__":
-    fire.Fire()

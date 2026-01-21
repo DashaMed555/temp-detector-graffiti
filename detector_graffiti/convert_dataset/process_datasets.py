@@ -1,19 +1,16 @@
-from pathlib import Path
 import random
 import shutil
+from pathlib import Path
 
-import fire
+import hydra
 import yaml
+from hydra.utils import get_original_cwd
+from omegaconf import DictConfig
 from utils import image_extensions
 
 
-def process_datasets(
-    datasets_dir="data",
-    output_dataset_dir="datasets/dataset",
-    run_type="train",
-    percentage=0.01,
-    balance_classes=True,
-):
+@hydra.main(version_base=None, config_path="../../conf", config_name="config")
+def process_datasets(config: DictConfig):
     """
     Объединяет YOLO-датасеты с балансировкой по количеству bbox.
 
@@ -24,12 +21,14 @@ def process_datasets(
         percentage (float): Какую часть данных взять (0.0 до 1.0).
         balance_classes (bool): Нужно ли балансировать классы.
     """
+    project_root = Path(get_original_cwd())
 
-    datasets_path = Path(datasets_dir)
-    output_path = Path(output_dataset_dir)
+    datasets_path = project_root / config.data_processing.paths.input_dir
+    output_path = project_root / config.data_processing.paths.output_path
+    run_type = config.data_processing.params.run_type
 
     if output_path.exists() and output_path.is_dir():
-        print(f"🧹 Очистка существующей директории: {output_dataset_dir}")
+        print(f"🧹 Очистка существующей директории: {output_path}")
         shutil.rmtree(output_path)
 
     output_images_dir = output_path / "images"
@@ -77,7 +76,7 @@ def process_datasets(
     print(f"📊 Сбор bbox-статистики для {run_type}...")
 
     if not datasets_path.exists():
-        print(f"❌ Ошибка: Директория {datasets_dir} не найдена")
+        print(f"❌ Ошибка: Директория {datasets_path} не найдена")
         return
 
     for dataset_folder in datasets_path.iterdir():
@@ -110,13 +109,17 @@ def process_datasets(
         print("⚠️  Изображения не найдены.")
         return
 
-    num_to_select = max(1, int(len(items) * percentage))
+    num_to_select = max(
+        1, int(len(items) * config.data_processing.params.percentage)
+    )
     items = random.sample(items, num_to_select)
 
-    print(f"📦 Кандидатов изображений после фильтрации по проценту: {len(items)}")
+    print(
+        f"📦 Кандидатов изображений после фильтрации по проценту: {len(items)}"
+    )
 
     # ---------- Балансировка по bbox ----------
-    if balance_classes:
+    if config.data_processing.params.balance_classes:
         random.shuffle(items)
 
         total_0 = sum(item["c0"] for item in items)
@@ -177,4 +180,4 @@ def process_datasets(
 
 
 if __name__ == "__main__":
-    fire.Fire(process_datasets)
+    process_datasets()

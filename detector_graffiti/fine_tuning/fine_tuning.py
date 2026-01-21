@@ -59,7 +59,7 @@ def main(config: DictConfig):
     mlflow_logger.start_run(run_name=f"train_{current_time}")
     logger.info("Run start MLflow")
 
-    with open(config.data_loading.train_json_path, "r") as f:
+    with open(config.paths.train_json, "r") as f:
         train_data = json.load(f)
 
     labels = sorted(
@@ -69,22 +69,22 @@ def main(config: DictConfig):
     id2label = {i: c for c, i in label2id.items()}
 
     train_ds = JsonDataset(
-        config.data_loading.train_json_path,
-        config.data_loading.train_image_path,
+        config.paths.train_json,
+        config.paths.train_images,
         label2id,
     )
     logger.info("Load train data")
-    logger.info(f"Images path: {config.data_loading.train_image_path}")
-    logger.info(f"Labels path: {config.data_loading.train_json_path}")
+    logger.info(f"Images path: {config.paths.train_images}")
+    logger.info(f"Labels path: {config.paths.train_json}")
 
     val_ds = JsonDataset(
-        config.data_loading.val_json_path,
-        config.data_loading.val_image_path,
+        config.paths.val_json,
+        config.paths.val_images,
         label2id,
     )
     logger.info("Load validation data")
-    logger.info(f"Images path: {config.data_loading.val_image_path}")
-    logger.info(f"Labels path: {config.data_loading.val_json_path}")
+    logger.info(f"Images path: {config.paths.val_images}")
+    logger.info(f"Labels path: {config.paths.val_json}")
 
     processor = AutoProcessor.from_pretrained(config.model.model_id)
     logger.info(f"Load processor from: {config.model.model_id}")

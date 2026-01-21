@@ -3,9 +3,11 @@ import random
 from pathlib import Path
 
 import cv2
-import fire
+import hydra
 import matplotlib.pyplot as plt
 import numpy as np
+from hydra.utils import get_original_cwd
+from omegaconf import DictConfig
 from utils import class_names
 
 
@@ -40,20 +42,23 @@ def draw_bboxes_on_image(
         if x2 <= x1 or y2 <= y1:
             continue
 
+        label = ann["label_name"]
+        color = colors.get(label, (0, 255, 0))
+
         cv2.rectangle(
             img_rgb,
             (x1, y1),
             (x2, y2),
-            colors.get(ann["label_name"], (0, 255, 0)),
+            color,
             2,
         )
         cv2.putText(
             img_rgb,
-            ann["label_name"],
+            label,
             (x1, y1 - 10),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
-            colors.get(ann["label_name"], (0, 255, 0)),
+            color,
             2,
         )
 
@@ -67,10 +72,7 @@ def draw_bboxes_on_image(
         plt.figure(figsize=(12, 8))
         plt.imshow(img_rgb)
         plt.title(
-            (
-                f"Image: {image_path.name}\n"
-                f"BBoxes: {len(annotations)}"
-            )
+            (f"Image: {image_path.name}\n" f"BBoxes: {len(annotations)}")
         )
         plt.axis("off")
         plt.tight_layout()
@@ -79,9 +81,11 @@ def draw_bboxes_on_image(
     return img_rgb
 
 
-def validate_with_visualization(
-    dataset_dir="datasets/dataset", run_type="train", num_samples=5, save_dir=None
-):
+save_dir = None
+
+
+@hydra.main(version_base=None, config_path="../../conf", config_name="config")
+def validate_with_visualization(config: DictConfig):
     """
     Визуальная проверка аннотаций с отрисовкой bounding boxes.
 
@@ -91,12 +95,19 @@ def validate_with_visualization(
         num_samples (int): Количество случайных изображений для проверки.
         save_dir (str, optional): Папка для сохранения результатов.
     """
-    dataset_path = Path(dataset_dir)
+    project_root = Path(get_original_cwd())
+
+    dataset_path = project_root / config.data_loading.root
+
+    run_type = config.validation.run_type
+    num_samples = config.validation.num_samples
+
     json_path = dataset_path / run_type / "annotations.json"
     images_dir = dataset_path / run_type / "images"
 
-    if save_dir:
-        save_dir = Path(save_dir)
+    save_dir = None
+    if config.validation.save_dir:
+        save_dir = project_root / config.validation.save_dir
         save_dir.mkdir(parents=True, exist_ok=True)
 
     try:
@@ -155,4 +166,4 @@ def validate_with_visualization(
 
 # Основная функция
 if __name__ == "__main__":
-    fire.Fire(validate_with_visualization)
+    validate_with_visualization()

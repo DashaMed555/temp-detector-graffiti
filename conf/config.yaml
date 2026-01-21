@@ -6,3 +6,12 @@ defaults:
   - logging: logging
   - inference: inference
   - onnx_converter: onnx_converter
+
+paths:
+  train_json: "${data_loading.root}/train/annotations.json"
+  val_json: "${data_loading.root}/valid/annotations.json"
+  train_images: "${data_loading.root}/train/images"
+  val_images: "${data_loading.root}/valid/images"
+
+params:
+  class_names: ["graffiti", "vandalism"]

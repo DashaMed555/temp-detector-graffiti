@@ -1,0 +1,3 @@
+run_type: "train"
+num_samples: 5
+save_dir: "reports/visualizations"

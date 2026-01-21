@@ -1,0 +1,11 @@
+paths:
+  input_dir: "data"
+  output_root: "datasets"
+  output_name: "dataset"
+
+  output_path: "${.output_root}/${.output_name}"
+
+params:
+  run_type: "train"
+  percentage: 0.01
+  balance_classes: True

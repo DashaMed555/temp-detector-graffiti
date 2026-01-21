@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
-import fire
+import hydra
+from hydra.utils import get_original_cwd
+from omegaconf import DictConfig
 from utils import (
     class_names,
     get_image_dimensions,
@@ -10,19 +12,21 @@ from utils import (
 )
 
 
-def convert_yolo_to_json(dataset_dir="datasets/dataset"):
+@hydra.main(version_base=None, config_path="../../conf", config_name="config")
+def convert_yolo_to_json(config: DictConfig):
     """
     Конвертирует YOLO аннотации в JSON формат.
 
     Args:
         dataset_dir (str): Путь к директории с датасетом.
     """
-    base_path = Path(dataset_dir)
+    project_root = Path(get_original_cwd())
+    dataset_path = project_root / config.data_loading.root
 
     for run_type in ["train", "valid", "test"]:
-        images_directory = base_path / run_type / "images"
-        labels_directory = base_path / run_type / "labels"
-        output_json_path = base_path / run_type / "annotations.json"
+        images_directory = dataset_path / run_type / "images"
+        labels_directory = dataset_path / run_type / "labels"
+        output_json_path = dataset_path / run_type / "annotations.json"
 
         if not images_directory.exists():
             print(f"Нет {run_type} директории")
@@ -30,7 +34,8 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
 
         # Получаем список изображений
         image_files = [
-            f for f in images_directory.iterdir() 
+            f
+            for f in images_directory.iterdir()
             if f.suffix.lower() in image_extensions
         ]
 
@@ -43,9 +48,13 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
             try:
                 width, height = get_image_dimensions(image_path)
 
-                annotation_path = labels_directory / image_path.with_suffix('.txt').name
+                annotation_path = (
+                    labels_directory / image_path.with_suffix(".txt").name
+                )
 
-                annotations = parse_yolo_annotation(annotation_path)
+                annotations = parse_yolo_annotation(
+                    annotation_path, config.params.class_names
+                )
 
                 image_data = {
                     "image_name": image_path.name,
@@ -61,7 +70,10 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
                     print(f"📊 Обработано {processed_count} изображений...")
 
             except Exception as e:
-                print(f"❌ Ошибка при обработке изображения {image_path.name}: {e}")
+                print(
+                    "❌ Ошибка при обработке изображения "
+                    f"{image_path.name}: {e}"
+                )
 
         # Сохраняем в JSON файл
         try:
@@ -92,4 +104,4 @@ def convert_yolo_to_json(dataset_dir="datasets/dataset"):
 
 
 if __name__ == "__main__":
-    fire.Fire(convert_yolo_to_json)
+    convert_yolo_to_json()
