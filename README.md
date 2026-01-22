@@ -358,10 +358,6 @@ poetry run graffiti-detector split_dataset data_loading.name="custom_dataset"
 
 ---
 
-На основе кода скрипта `convert_yolo_to_json.py`, вот детальное описание для вашего README. Оно объясняет переход от формата YOLO к формату, специфичному для современных трансформеров детекции, таких как Grounding DINO.
-
----
-
 **Доступные параметры для настройки:**
 
 - `data_loading.name` — название датасета, который нужно разделить (default: `"dataset"`)
