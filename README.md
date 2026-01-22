@@ -156,7 +156,7 @@ poetry run pre-commit run --all-files
 Поскольку датасеты и веса моделей слишком велики для Git, мы используем **DVC**. Данные хранятся в облаке Google Drive.
 
 **Получение доступа:**
-Для получения `CLIENT_ID` и `CLIENT_SECRET` обратитесь по адресу: [d.medvdeveda@g.nsu.ru](mailto:d.medvdeveda@g.nsu.ru).
+Для получения `CLIENT_ID` и `CLIENT_SECRET` обратитесь по адресу: [d.medvedeva@g.nsu.ru](mailto:d.medvdeveda@g.nsu.ru).
 
 **Конфигурация и загрузка:**
 
