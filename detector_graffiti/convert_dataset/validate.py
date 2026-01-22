@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from utils import class_names
 
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
@@ -21,6 +20,7 @@ def draw_bboxes_on_image(
     annotations: List[Dict[str, Any]],
     output_path: Optional[Union[str, Path]] = None,
     show_image: bool = True,
+    class_names: List[str] = ["graffiti", "vandalism"],
 ) -> Optional[np.ndarray]:
     """
     Draws bounding boxes on an image based on provided annotations.
@@ -116,16 +116,17 @@ def validate_with_visualization(config: DictConfig) -> None:
 
     # Resolve paths from configuration
     dataset_path = project_root / config.data_loading.root
-    run_type = config.validation.run_type
-    num_samples = config.validation.num_samples
+    run_type = config.data_validation.run_type
+    num_samples = config.data_validation.num_samples
+    class_names = config.params.class_names
 
     json_path = dataset_path / run_type / "annotations.json"
     images_dir = dataset_path / run_type / "images"
 
     # Setup output directory for visualizations if requested
     save_dir = None
-    if config.validation.save_dir:
-        save_dir = project_root / config.validation.save_dir
+    if config.data_validation.save_dir:
+        save_dir = project_root / config.data_validation.save_dir
         save_dir.mkdir(parents=True, exist_ok=True)
 
     try:
@@ -182,7 +183,11 @@ def validate_with_visualization(config: DictConfig) -> None:
 
             # Draw and show
             draw_bboxes_on_image(
-                image_path, annotations, output_path, show_image=True
+                image_path,
+                annotations,
+                output_path,
+                show_image=True,
+                class_names=class_names,
             )
 
             # Pause until Enter (skip for last)

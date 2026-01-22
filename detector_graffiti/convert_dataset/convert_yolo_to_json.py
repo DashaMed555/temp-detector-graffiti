@@ -6,12 +6,7 @@ from typing import Any, Dict, List
 import hydra
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from utils import (
-    class_names,
-    get_image_dimensions,
-    image_extensions,
-    parse_yolo_annotation,
-)
+from utils import get_image_dimensions, image_extensions, parse_yolo_annotation
 
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
@@ -39,6 +34,7 @@ def convert_yolo_to_json(config: DictConfig) -> None:
     # Ensure paths are project-relative
     project_root: Path = Path(get_original_cwd())
     dataset_path: Path = project_root / config.data_loading.root
+    class_names = config.params.class_names
 
     # Process each split of the dataset
     for run_type in ["train", "valid", "test"]:
@@ -76,7 +72,7 @@ def convert_yolo_to_json(config: DictConfig) -> None:
 
                 # Parse YOLO format to internal representation
                 annotations: List[Dict[str, Any]] = parse_yolo_annotation(
-                    annotation_path, config.params.class_names
+                    annotation_path, class_names
                 )
 
                 json_data.append(
