@@ -8,7 +8,7 @@ import yaml
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from detector_graffiti.convert_dataset.utils import image_extensions
+from detector_graffiti.convert_dataset.utils import IMAGE_EXTENSIONS
 
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
@@ -118,7 +118,7 @@ def process_datasets(config: DictConfig) -> None:
             continue
 
         for img_path in images_dir.iterdir():
-            if img_path.suffix.lower() not in image_extensions:
+            if img_path.suffix.lower() not in IMAGE_EXTENSIONS:
                 continue
 
             ann_path: Path = labels_dir / (img_path.stem + ".txt")

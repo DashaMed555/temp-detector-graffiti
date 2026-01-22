@@ -7,7 +7,7 @@ from typing import Dict, List
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
-from detector_graffiti.convert_dataset.utils import image_extensions
+from detector_graffiti.convert_dataset.utils import IMAGE_EXTENSIONS
 
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ def split_dataset(config: DictConfig) -> None:
     image_files: List[str] = [
         f.name
         for f in images_dir.iterdir()
-        if f.suffix.lower() in image_extensions
+        if f.suffix.lower() in IMAGE_EXTENSIONS
     ]
 
     if not image_files:

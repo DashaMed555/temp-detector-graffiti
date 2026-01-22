@@ -8,7 +8,7 @@ from PIL import Image
 logger = logging.getLogger(__name__)
 
 # Global constant for supported image formats
-image_extensions: Tuple[str, ...] = (".png", ".jpg", ".jpeg", ".bmp", ".tiff")
+IMAGE_EXTENSIONS: Tuple[str, ...] = (".png", ".jpg", ".jpeg", ".bmp", ".tiff")
 
 
 def parse_yolo_annotation(

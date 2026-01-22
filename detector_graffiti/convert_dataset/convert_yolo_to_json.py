@@ -7,8 +7,8 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
 from detector_graffiti.convert_dataset.utils import (
+    IMAGE_EXTENSIONS,
     get_image_dimensions,
-    image_extensions,
     parse_yolo_annotation,
 )
 
@@ -55,7 +55,7 @@ def convert_yolo_to_json(config: DictConfig) -> None:
         image_files: List[Path] = [
             f
             for f in images_directory.iterdir()
-            if f.suffix.lower() in image_extensions
+            if f.suffix.lower() in IMAGE_EXTENSIONS
         ]
 
         json_data: List[Dict[str, Any]] = []
