@@ -182,7 +182,7 @@ poetry run dvc pull
 - **Проверка данных:**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/validate.py data_validation.num_samples=5
+poetry run graffiti-detector validate data_validation.num_samples=5
 
 ```
 
@@ -237,7 +237,7 @@ poetry run graffiti-detector --help
 Для стандартного запуска используйте команду:
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/process_datasets.py
+poetry run graffiti-detector process_datasets
 
 ```
 
@@ -248,21 +248,21 @@ poetry run python detector_graffiti/convert_dataset/process_datasets.py
 - **Изменение объема данных (взять 50%):**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/process_datasets.py data_processing.params.percentage=0.5
+poetry run graffiti-detector process_datasets data_processing.params.percentage=0.5
 
 ```
 
 - **Отключение балансировки:**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/process_datasets.py data_processing.params.balance_classes=False
+poetry run graffiti-detector process_datasets data_processing.params.balance_classes=False
 
 ```
 
 - **Смена выходной папки:**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/process_datasets.py data_processing.paths.output_name="custom_dataset"
+poetry run graffiti-detector process_datasets data_processing.paths.output_name="custom_dataset"
 
 ```
 
@@ -311,7 +311,7 @@ datasets/dataset/
 #### Запуск:
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/split_dataset.py
+poetry run graffiti-detector split_dataset
 
 ```
 
@@ -322,7 +322,7 @@ poetry run python detector_graffiti/convert_dataset/split_dataset.py
 - **Изменение пропорций (например, без тестовой выборки):**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/split_dataset.py \
+poetry run graffiti-detector split_dataset \
   data_splitting.train_ratio=0.9 \
   data_splitting.val_ratio=0.1 \
   data_splitting.test_ratio=0.0
@@ -332,14 +332,14 @@ poetry run python detector_graffiti/convert_dataset/split_dataset.py \
 - **Изменение seed для другого случайного разбиения:**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/split_dataset.py data_splitting.seed=42
+poetry run graffiti-detector split_dataset data_splitting.seed=42
 
 ```
 
 - **Выбор конкретного датасета для разделения:**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/split_dataset.py data_loading.name="my_new_data"
+poetry run graffiti-detector split_dataset data_loading.name="my_new_data"
 
 ```
 
@@ -392,7 +392,7 @@ poetry run python detector_graffiti/convert_dataset/split_dataset.py data_loadin
 #### Запуск:
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/convert_yolo_to_json.py
+poetry run graffiti-detector convert_yolo_to_json
 
 ```
 
@@ -403,7 +403,7 @@ poetry run python detector_graffiti/convert_dataset/convert_yolo_to_json.py
 - **Смена имен классов (если вы адаптируете модель под другой проект):**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/convert_yolo_to_json.py \
+poetry run graffiti-detector convert_yolo_to_json \
   params.class_names="['art', 'damage']"
 
 ```
@@ -411,7 +411,7 @@ poetry run python detector_graffiti/convert_dataset/convert_yolo_to_json.py \
 - **Выбор другого датасета:**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/convert_yolo_to_json.py \
+poetry run graffiti-detector convert_yolo_to_json \
   data_loading.name="another_dataset"
 
 ```
@@ -449,7 +449,7 @@ poetry run python detector_graffiti/convert_dataset/convert_yolo_to_json.py \
 По умолчанию скрипт берет случайные 10 изображений из валидационной выборки:
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/validate.py
+poetry run graffiti-detector validate
 
 ```
 
@@ -460,21 +460,21 @@ poetry run python detector_graffiti/convert_dataset/validate.py
 - **Проверка тестовой выборки (вместо валидационной):**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/validate.py data_validation.run_type="test"
+poetry run graffiti-detector validate data_validation.run_type="test"
 
 ```
 
 - **Увеличение количества проверяемых образцов:**
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/validate.py data_validation.num_samples=25
+poetry run graffiti-detector validate data_validation.num_samples=25
 
 ```
 
 - **Сохранение результатов на диск**: Если вы работаете на сервере без графического интерфейса, можно сохранять отрисованные картинки в папку:
 
 ```bash
-poetry run python detector_graffiti/convert_dataset/validate.py data_validation.save_dir="plots/validation_results"
+poetry run graffiti-detector validate data_validation.save_dir="plots/validation_results"
 
 ```
 
