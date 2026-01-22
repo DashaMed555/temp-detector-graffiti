@@ -7,5 +7,5 @@ paths:
 
 params:
   run_type: "train"
-  percentage: 0.01
+  percentage: 1.00
   balance_classes: True
