@@ -4,11 +4,11 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-import hydra
 import yaml
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from utils import image_extensions
+
+from detector_graffiti.convert_dataset.utils import image_extensions
 
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
@@ -43,7 +43,6 @@ def analyze_annotation(path: Path) -> Tuple[int, int]:
     return c0, c1
 
 
-@hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def process_datasets(config: DictConfig) -> None:
     """
     Merges multiple YOLO datasets with class balancing based on

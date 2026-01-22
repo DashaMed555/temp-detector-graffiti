@@ -3,16 +3,19 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List
 
-import hydra
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from utils import get_image_dimensions, image_extensions, parse_yolo_annotation
+
+from detector_graffiti.convert_dataset.utils import (
+    get_image_dimensions,
+    image_extensions,
+    parse_yolo_annotation,
+)
 
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
 
 
-@hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def convert_yolo_to_json(config: DictConfig) -> None:
     """
     Converts YOLO format annotations to a single JSON file for each
