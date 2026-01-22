@@ -1,2 +1,2 @@
 name: "difficult_dataset"
-root: "datasets/${.name}/${.name}"
+root: "datasets/${.name}"

@@ -1,2 +1,2 @@
 name: "normal_dataset"
-root: "datasets/${.name}/${.name}"
+root: "datasets/${.name}"
