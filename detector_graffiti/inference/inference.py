@@ -128,7 +128,7 @@ def main(config: DictConfig):
     inference = Inference(config, logger)
     logger.info("Init inference")
 
-    input_dir = Path(config.data_loading.test_image_path)
+    input_dir = Path(config.paths.test_images)
     logger.info(f"Input directory: {input_dir}")
 
     if not input_dir.exists():
