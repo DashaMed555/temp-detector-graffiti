@@ -194,7 +194,7 @@ poetry run graffiti-detector validate data_validation.num_samples=5
 - **Проверка CLI:**
 
 ```bash
-poetry run graffiti-detector --help
+poetry run graffiti-detector validate --help
 
 ```
 
