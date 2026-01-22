@@ -344,7 +344,7 @@ poetry run graffiti-detector split_dataset data_splitting.seed=42
 - **Выбор конкретного датасета для разделения:**
 
 ```bash
-poetry run graffiti-detector split_dataset data_loading.name="my_new_data"
+poetry run graffiti-detector split_dataset data_loading.name="custom_dataset"
 
 ```
 
@@ -427,7 +427,7 @@ poetry run graffiti-detector convert_yolo_to_json \
 
 ```bash
 poetry run graffiti-detector convert_yolo_to_json \
-  data_loading.name="another_dataset"
+  data_loading.name="custom_dataset"
 
 ```
 
@@ -570,7 +570,7 @@ poetry run graffiti-detector train
 ```bash
 # Обучение на большом датасете (5 эпох)
 poetry run graffiti-detector train \
-  data_loading=big_dataset \
+  data_loading.name=custom_dataset \
   fine_tuning.num_train_epochs=5 \
   fine_tuning.learning_rate=2e-5
 
@@ -599,12 +599,12 @@ poetry run mlflow ui --port 8888
 
 ### Резюме команд CLI для Train
 
-| Действие                   | Команда                                                             |
-| -------------------------- | ------------------------------------------------------------------- |
-| **Полный цикл подготовки** | См. шаги 1 (A, B, C)                                                |
-| **Запуск Fine-tuning**     | `poetry run graffiti-detector train`                                |
-| **Смена конфига данных**   | `poetry run graffiti-detector train data_loading=difficult_dataset` |
-| **Запуск MLflow UI**       | `poetry run mlflow ui`                                              |
+| Действие                   | Команда                                                               |
+| -------------------------- | --------------------------------------------------------------------- |
+| **Полный цикл подготовки** | См. шаги 1 (A, B, C)                                                  |
+| **Запуск Fine-tuning**     | `poetry run graffiti-detector train`                                  |
+| **Смена конфига данных**   | `poetry run graffiti-detector train data_loading.name=custom_dataset` |
+| **Запуск MLflow UI**       | `poetry run mlflow ui`                                                |
 
 ---
 
@@ -670,7 +670,7 @@ poetry run graffiti-detector inference \
 
 1. **Проверка через MLflow:** Убедиться, что метрики `eval_precision` и `eval_f1` соответствуют целевым показателям.
 2. **DVC Sync:** Проверить наличие актуальной версии модели в удаленном хранилище Google Drive для возможности быстрого отката (rollback).
-3. **Validation Check:** Запустить `validate.py` на контрольной выборке `difficult_dataset` для визуальной проверки.
+3. **Validation Check:** Запустить `validate.py` на контрольной выборке `custom_dataset` для визуальной проверки.
 
 ---
 
