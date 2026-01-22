@@ -4,7 +4,6 @@ import time
 from pathlib import Path
 
 import cv2
-import hydra
 import numpy as np
 import torch
 from omegaconf import DictConfig
@@ -93,7 +92,6 @@ class Inference:
         return result
 
 
-@hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
     """
     Main inference function for detecting graffiti in images.

@@ -3,7 +3,6 @@ import json
 import logging
 from pathlib import Path
 
-import hydra
 from omegaconf import DictConfig
 from transformers import (
     AutoProcessor,
@@ -21,7 +20,6 @@ from ..grounding_dino_trainer.trainer import GroundingDINOTrainer
 from ..logging.logging import MLflowLogger
 
 
-@hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
     """
     Main function for fine-tuning Grounding DINO model for graffiti detection.
