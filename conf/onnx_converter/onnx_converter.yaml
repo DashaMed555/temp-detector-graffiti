@@ -1,6 +1,7 @@
 output_dir: "runs/onnx"
-ft_model_id: "../grounding_dino_ft"
-image_path: "../002350.png"
-image_size: (800, 800)
+ft_model_id: "runs/fine-tuning/2026-01-21 18-13-57/ft_model"
+image_path: "datasets/000011.jpg"
+image_size_h: 800
+image_size_w: 800
 prompt: "graffiti . vandalism . street art ."
 max_length: 64

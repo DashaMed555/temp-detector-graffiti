@@ -32,7 +32,7 @@ def main(config: DictConfig):
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
             logging.FileHandler(
-                str(output_dir / "inference.log"), encoding="utf-8"
+                str(output_dir / "convert.log"), encoding="utf-8"
             ),
             logging.StreamHandler(),
         ],
@@ -55,8 +55,10 @@ def main(config: DictConfig):
 
     image = Image.open(conf_oc.image_path).convert("RGB")
     logger.info(f"Load image from: {conf_oc.image_path}")
-    image = image.resize(conf_oc.image_size)
-    logger.info(f"Resize image to: {conf_oc.image_size}")
+    image = image.resize((conf_oc.image_size_w, conf_oc.image_size_h))
+    logger.info(
+        f"Resize image to: {conf_oc.image_size_w} x {conf_oc.image_size_h}"
+    )
 
     logger.info("Preparing model inputs")
     inputs = processor(
@@ -104,7 +106,7 @@ def main(config: DictConfig):
             "logits": {0: "batch_size"},
             "pred_boxes": {0: "batch_size"},
         },
-        opset_version=19,
+        opset_version=17,
         do_constant_folding=True,
     )
     logger.info("ONNX export completed successfully")
