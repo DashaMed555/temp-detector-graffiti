@@ -76,9 +76,9 @@
 **Источники данных (Roboflow):**
 
 - **Надписи:**
-  - [Graffiti Detection](https://universe.roboflow.com/mpl2/graffiti-detection-shzgr/) (70 изображений, 124 объектов вандализма)
+  - [Graffiti Detection](https://universe.roboflow.com/mpl2/graffiti-detection-shzgr/) (70 изображений, 124 объекта вандализма)
 - **Арты и надписи:**
-  - [17k Graffiti](https://universe.roboflow.com/detr-2bavb/17k-graffiti/) (7 641 изображение, 14 703 объектов граффити),
+  - [17k Graffiti](https://universe.roboflow.com/detr-2bavb/17k-graffiti/) (7 641 изображение, 14 703 объекта граффити),
   - [train](https://universe.roboflow.com/thais-souza/train-tj6ju/) (707 изображений: 386 объектов граффити, 703 объекта вандализма)
 
 ---
