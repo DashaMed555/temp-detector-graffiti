@@ -26,8 +26,6 @@ class MLflowLogger:
             "eval_precision",
             "eval_recall",
             "eval_f1",
-            "loss",
-            "train_loss",
         ]
 
         self.metrics_history = {}
@@ -77,7 +75,7 @@ class MLflowLogger:
         self._create_plots(
             ["loss", "eval_loss"],
             "loss_plot.png",
-            "Training and Validation Loss",
+            "Validation Loss",
         )
 
         self._create_plots(["eval_f1"], "f1_plot.png", "F1 Score")
