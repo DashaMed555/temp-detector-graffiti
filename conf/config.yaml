@@ -1,4 +1,5 @@
 defaults:
+  - _self_
   - data_loading: normal_dataset
   - model: model
   - freeze_layers: freeze_layers
