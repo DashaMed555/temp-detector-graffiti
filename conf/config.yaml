@@ -1,6 +1,9 @@
 defaults:
   - _self_
   - data_loading: normal_dataset
+  - data_processing: data_processing
+  - data_splitting: data_splitting
+  - data_validation: data_validation
   - model: model
   - freeze_layers: freeze_layers
   - fine_tuning: fine_tuning
