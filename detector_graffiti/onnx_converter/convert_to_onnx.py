@@ -2,14 +2,12 @@ import datetime
 import logging
 from pathlib import Path
 
-import hydra
 import torch
 from omegaconf import DictConfig
 from PIL import Image
 from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
 
 
-@hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(config: DictConfig):
     """
     Convert a fine-tuned Grounding DINO model to ONNX format

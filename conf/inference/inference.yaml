@@ -1,4 +1,3 @@
 output_dir: "runs/inference"
-model_path: "runs/fine-tuning/2026-01-21 18-13-57/ft_model"
 prompt: "legal graffiti . illegal graffiti ."
 threshold: 0.4
