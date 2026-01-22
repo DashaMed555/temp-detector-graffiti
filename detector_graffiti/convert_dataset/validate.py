@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import cv2
-import hydra
 import matplotlib.pyplot as plt
 import numpy as np
 from hydra.utils import get_original_cwd
@@ -101,7 +100,6 @@ def draw_bboxes_on_image(
     return img_rgb
 
 
-@hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def validate_with_visualization(config: DictConfig) -> None:
     """
     Performs visual validation of dataset annotations by drawing bboxes

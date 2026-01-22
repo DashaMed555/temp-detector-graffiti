@@ -4,16 +4,15 @@ import shutil
 from pathlib import Path
 from typing import Dict, List
 
-import hydra
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
-from utils import image_extensions
+
+from detector_graffiti.convert_dataset.utils import image_extensions
 
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
 
 
-@hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def split_dataset(config: DictConfig) -> None:
     """
     Splits the dataset into train, validation, and test sets based on
